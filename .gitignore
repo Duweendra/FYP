@@ -1,5 +1,8 @@
 /build
-/node_modules
+**/node_modules
 package-lock.json
 /build
 .eslintcache
+node_modules/
+**/node_modules
+*/node_modules
