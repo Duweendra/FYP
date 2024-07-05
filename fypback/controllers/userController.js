@@ -6,6 +6,7 @@ import Scan from '../models/Scans.js';
 import upload from '../config/multer.js';
 import multer from 'multer';
 import path from 'path';
+import Employee from '../models/Employee.js';
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -24,28 +25,25 @@ const createUser = async (req, res) => {
   }
 };
 
-const createScan = async (req, res) => {
-  
-  const { pid, note, prediction, probability } = req.body;
+const createEmployee = async (req, res) => {
+  const { name, JobTitle, EmployeeStatus } = req.body;
   const imagePath = req.file ? req.file.path : null;
-
   try {
-    const scan = new Scan({ pid, note, prediction, probability, image: imagePath });
-    await scan.save();
-
-    res.status(201).json({ message: 'Scan saved successfully!' });
+    const employee = new Employee({ name, JobTitle, EmployeeStatus ,image: imagePath });
+    await employee.save();
+    
+   // const {userDetails} = Employee.toObject();
+    res.status(201).json({ 'employeeinfo': employee });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
-
-};
-
+}; 
 
 
-const getScan = async (req, res) => {
+const getEmployee = async (req, res) => {
   try {
-    const scans = await Scan.find();
-    res.json(scans);
+    const employees = await Employee.find();
+    res.json(employees);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -88,4 +86,4 @@ const loginUser = async (req, res) => {
 };
 
 
-export { getUsers, createUser, loginUser, getScan, createScan };
+export { getUsers, createUser, loginUser, createEmployee,getEmployee};

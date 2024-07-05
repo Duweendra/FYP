@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
-import scanRoutes from "./routes/scanRoutes.js";
+import employeeRoutes from "./routes/employeeRoutes.js";
 import Cors from 'cors'
 // Load environment variables
 dotenv.config();
@@ -17,7 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/users', userRoutes);
-app.use('/api/scan', scanRoutes);
+app.use('/api/employee', employeeRoutes);
 app.use(express.urlencoded({ extended: true }))
 app.use('/uploads', express.static('uploads'));
 const PORT = process.env.PORT || 5000;

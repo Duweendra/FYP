@@ -60,8 +60,8 @@ const Login = () => {
       const userData = { user, newUser, accessToken };
       setAuth(userData);
 
-     toast.info('Login Successful');
-     navigate(from);
+      navigate(from);
+      toast.info('Login Successful');
      
 
   } catch (err) {
