@@ -1,5 +1,7 @@
 import axios from "../../api/axios";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import "../../assets/css/employee.css";
 import {
   Badge,
   Card,
@@ -53,11 +55,20 @@ const Tables = () => {
   const [pid, setPid] = useState("");
   const [note, setNote] = useState("");
   const [employee, setEmployee] = useState(loadDefaultEmployeeObj);
+  const [errMsg, setErrMsg] = useState("");
+  const [page, setpage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchScans = async () => {
+  const fetchScans = async (page = 1, limit = 10) => {
     try {
-      const response = await axios.get("/api/employee"); // Adjust the URL as necessary
-      setScans(response.data);
+      const response = await axios.get(
+        `/api/employee?page=${page}&limit=${limit}`
+      );
+      setScans(response.data.employees);
+      setTotalPages(response.data.totalPages); // Assuming you have a state for total pages
+      setCurrentPage(response.data.currentPage); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {
       setError(error.message);
@@ -71,10 +82,13 @@ const Tables = () => {
   const handleRowClick = (scan) => {
     setSelectedImage(`http://localhost:8000/${scan.image}`);
     setShowModal(true);
-    setNote(scan?.note);
-    setPid(scan?.pid);
-    setProbability(scan?.probability);
-    setPredict(scan?.prediction);
+    setEmployee({
+      ...employee,
+      name: scan.name,
+      JobTitle: scan.JobTitle,
+      EmployeeStatus: scan.EmployeeStatus,
+      JoinedDate: scan.JoinedDate,
+    });
   };
 
   const handleClose = () => {
@@ -83,6 +97,7 @@ const Tables = () => {
   };
 
   const openemployee = () => {
+    setSelectedImage(null);
     setEmployee(loadDefaultEmployeeObj);
     setShowModal(true);
   };
@@ -91,38 +106,61 @@ const Tables = () => {
     setShowModal(!showModal);
   };
 
-  const employeesave = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", employee.name);
+    formData.append("EmployeeStatus", employee.EmployeeStatus);
+    formData.append("DOB", employee.DOB);
+    formData.append("JobTitle", employee.JobTitle);
+    formData.append("JoinedDate", employee.JoinedDate);
+    formData.append("image", employee.image);
+    console.log(employee.image);
+
     try {
-      const formData = new FormData();
-
-      formData.append("name", employee.name);
-      formData.append("EmployeeStatus", employee.EmployeeStatus);
-      formData.append("DOB", employee.DOB);
-      formData.append("JobTitle", employee.JobTitle);
-      formData.append("JoinedDate", employee.JoinedDate);
-      formData.append("image", selectedImage);
-
-      await axios.post("/api/employee", formData);
-      console.log("Employee saved:", formData);
-      fetchScans();
-      setShowModal(false);
+      const response = await axios.post("/api/employee", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.info("Saving Successful");
       setEmployee(loadDefaultEmployeeObj);
-    } catch (error) {
-      console.error("There was an error saving the employee data:", error);
+      toggleModal();
+    } catch (err) {
+      if (!err?.response) {
+        console.log(err);
+        setErrMsg("No Server Response");
+        toast.error("No Server Response", err);
+      } else if (err.response?.status === 400) {
+        setErrMsg("Saving error");
+        toast.error("Saving error", err);
+      } else if (err.response?.status === 401) {
+        setErrMsg("Unauthorized");
+        toast.error("Unauthorized", err);
+      } else {
+        setErrMsg("Saving Failed");
+        toast.error("Saving Failed", err);
+      }
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Image = reader.result;
-        setSelectedImage(file);
-        setEmployee({ ...employee, image: selectedImage });
+        setSelectedImage(base64Image);
+        setEmployee({ ...employee, image: file });
+        console.log("file", file);
       };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+
+    fetchScans(newPage);
   };
 
   return (
@@ -131,7 +169,9 @@ const Tables = () => {
       {/* Page content */}
       <Container className="mt--7" fluid>
         {/* Table */}
-        <Button onClick={() => openemployee()}>Add Employee</Button>
+        <Button className="addemployee" onClick={() => openemployee()}>
+          +
+        </Button>
         <Row>
           <div className="col">
             <Card className="shadow">
@@ -165,7 +205,7 @@ const Tables = () => {
                             />
                           </a>
                           <Media>
-                            <span className="mb-0 text-sm">{scan._id}</span>
+                            <span className="mb-0 text-sm">{scan.name}</span>
                           </Media>
                         </Media>
                       </th>
@@ -178,54 +218,11 @@ const Tables = () => {
               </Table>
               <CardFooter className="py-4">
                 <nav aria-label="...">
-                  <Pagination
-                    className="pagination justify-content-end mb-0"
-                    listClassName="justify-content-end mb-0"
-                  >
-                    <PaginationItem className="disabled">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                        tabIndex="-1"
-                      >
-                        <i className="fas fa-angle-left" />
-                        <span className="sr-only">Previous</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem className="active">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        2 <span className="sr-only">(current)</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        3
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <i className="fas fa-angle-right" />
-                        <span className="sr-only">Next</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                  </Pagination>
+                  <PaginationComponent
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
                 </nav>
               </CardFooter>
             </Card>
@@ -260,7 +257,7 @@ const Tables = () => {
                 />
               )}
             </div>
-            <form onSubmit={employeesave}>
+            <form onSubmit={handleSubmit}>
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <Input
@@ -276,9 +273,10 @@ const Tables = () => {
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <Input
+                    color="info"
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange}
+                    onChange={handleImageUpload}
                   />
                 </InputGroup>
               </FormGroup>
@@ -344,3 +342,55 @@ const Tables = () => {
 };
 
 export default Tables;
+
+const PaginationComponent = ({ currentPage, totalPages, onPageChange }) => {
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
+
+  return (
+    <Pagination className="pagination justify-content-end mb-0">
+      <PaginationItem disabled={currentPage === 1}>
+        <PaginationLink
+          href="#pablo"
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage > 1) onPageChange(currentPage - 1);
+          }}
+          tabIndex="-1"
+        >
+          <i className="fas fa-angle-left" />
+          <span className="sr-only">Previous</span>
+        </PaginationLink>
+      </PaginationItem>
+
+      {pageNumbers.map((page1) => (
+        <PaginationItem key={page1} active={page1 === currentPage}>
+          <PaginationLink
+            href="#pablo"
+            onClick={(e) => {
+              console.log("page", page1);
+              onPageChange(page1);
+            }}
+          >
+            {page1}
+          </PaginationLink>
+        </PaginationItem>
+      ))}
+
+      <PaginationItem disabled={currentPage === totalPages}>
+        <PaginationLink
+          href="#pablo"
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) onPageChange(currentPage + 1);
+          }}
+        >
+          <i className="fas fa-angle-right" />
+          <span className="sr-only">Next</span>
+        </PaginationLink>
+      </PaginationItem>
+    </Pagination>
+  );
+};

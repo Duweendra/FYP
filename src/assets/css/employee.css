@@ -1,0 +1,13 @@
+.addemployee {
+  border-radius: 30px;
+  padding: 10px 23px;
+  float: right;
+  right: 54px;
+  top: -20px;
+  z-index: 100;
+  background: #f5365c;
+  border: 0px;
+  color: white;
+  font-weight: 600;
+  font-size: x-large;
+}
