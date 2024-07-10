@@ -28,21 +28,42 @@ const createUser = async (req, res) => {
   }
 };
 
-const createEmployee = async (req, res) => {
-  const { name, JobTitle, JoinedDate, EmployeeStatus } = req.body;
+const createOrUpdateEmployee = async (req, res) => {
+  const { id, name, JobTitle, JoinedDate, EmployeeStatus } = req.body;
   const imagePath = req.file ? req.file.path : null;
-  try {
-    const employee = new Employee({
-      name,
-      JobTitle,
-      JoinedDate,
-      EmployeeStatus,
-      image: imagePath,
-    });
-    await employee.save();
 
-    // const {userDetails} = Employee.toObject();
-    res.status(201).json({ employeeinfo: employee });
+  try {
+    if (id == -1 || id == null) {
+      // Create a new employee
+      const newEmployee = new Employee({
+        name,
+        JobTitle,
+        JoinedDate,
+        EmployeeStatus,
+        image: imagePath,
+      });
+      await newEmployee.save();
+      res.status(201).json({ employeeinfo: newEmployee });
+    } else {
+      // Update existing employee
+      const updatedEmployee = await Employee.findByIdAndUpdate(
+        id,
+        {
+          name,
+          JobTitle,
+          JoinedDate,
+          EmployeeStatus,
+          image: imagePath,
+        },
+        { new: true }
+      );
+
+      if (!updatedEmployee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+
+      res.status(200).json({ employeeinfo: updatedEmployee });
+    }
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -110,4 +131,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { getUsers, createUser, loginUser, createEmployee, getEmployee };
+export { getUsers, createUser, loginUser, createOrUpdateEmployee, getEmployee };

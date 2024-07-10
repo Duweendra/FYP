@@ -34,6 +34,7 @@ import ReactDatetimeClass from "react-datetime";
 
 const loadDefaultEmployeeObj = () => {
   return {
+    _id: -1,
     name: "",
     DOB: new Date(),
     Gender: "",
@@ -61,7 +62,7 @@ const Tables = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchScans = async (page = 1, limit = 10) => {
+  const fetchScans = async (page = 1, limit = 5) => {
     try {
       const response = await axios.get(
         `/api/employee?page=${page}&limit=${limit}`
@@ -84,10 +85,12 @@ const Tables = () => {
     setShowModal(true);
     setEmployee({
       ...employee,
+      _id: scan._id,
       name: scan.name,
       JobTitle: scan.JobTitle,
       EmployeeStatus: scan.EmployeeStatus,
       JoinedDate: scan.JoinedDate,
+      image: selectedImage,
     });
   };
 
@@ -110,6 +113,7 @@ const Tables = () => {
     e.preventDefault();
 
     const formData = new FormData();
+    formData.append("id", employee._id);
     formData.append("name", employee.name);
     formData.append("EmployeeStatus", employee.EmployeeStatus);
     formData.append("DOB", employee.DOB);
@@ -123,6 +127,7 @@ const Tables = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.info("Saving Successful");
+      fetchScans(currentPage);
       setEmployee(loadDefaultEmployeeObj);
       toggleModal();
     } catch (err) {
