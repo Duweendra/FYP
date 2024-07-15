@@ -22,6 +22,7 @@ import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 import Tables from "views/examples/Tables.js";
 import Icons from "views/examples/Icons.js";
+import LeaveTable from "views/examples/LeaveTable";
 
 var routes = [
   {
@@ -32,10 +33,17 @@ var routes = [
     layout: "/admin",
   },
   {
-    path: "/tables",
+    path: "/employees",
     name: "Employee Management",
     icon: "ni ni-bullet-list-67 text-red",
     component: <Tables />,
+    layout: "/admin",
+  },
+  {
+    path: "/leave",
+    name: "Leave",
+    icon: "ni ni-user-run text-blue",
+    component: <LeaveTable />,
     layout: "/admin",
   },
   {

@@ -7,6 +7,7 @@ import upload from "../config/multer.js";
 import multer from "multer";
 import path from "path";
 import Employee from "../models/Employee.js";
+import Leave from "../models/Leave.js";
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -27,6 +28,83 @@ const createUser = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+const createLeave = async (req, res) => {
+  const { id, employeeId, leaveType, startDate, endDate, reason, status } =
+    req.body;
+
+  try {
+    // Check if the employee exists
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    if (id == -1 || id == null) {
+      // Create a new leave record
+      const leave = new Leave({
+        employee: employeeId,
+        leaveType,
+        startDate,
+        endDate,
+        reason,
+        status: "Pending",
+      });
+      await leave.save();
+      res.status(201).json({ leaveInfo: leave });
+    } else {
+      const updatedLeave = await Leave.findByIdAndUpdate(
+        id,
+        {
+          employee: employeeId,
+          leaveType,
+          startDate,
+          endDate,
+          reason,
+          status,
+        },
+        { new: true }
+      );
+
+      if (!updatedEmployee) {
+        return res.status(404).json({ message: "Leave not found" });
+      }
+
+      res.status(200).json({ leaveinfo: updatedLeave });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getLeave = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const leaves = await Leave.find()
+      .limit(limit)
+      .skip(startIndex)
+      .populate("employee");
+
+    const totalleaves = await Leave.countDocuments();
+    const totalPages = Math.ceil(totalleaves / limit);
+
+    res.json({
+      currentPage: page,
+      totalPages: totalPages,
+      totalLeaves: totalleaves,
+      leaves: leaves,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export default createLeave;
 
 const createOrUpdateEmployee = async (req, res) => {
   const { id, name, JobTitle, JoinedDate, EmployeeStatus } = req.body;
@@ -131,4 +209,12 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { getUsers, createUser, loginUser, createOrUpdateEmployee, getEmployee };
+export {
+  getUsers,
+  createUser,
+  loginUser,
+  createOrUpdateEmployee,
+  getEmployee,
+  createLeave,
+  getLeave,
+};
