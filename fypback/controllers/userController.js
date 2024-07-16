@@ -34,6 +34,7 @@ const createLeave = async (req, res) => {
     req.body;
 
   try {
+    console.log(req.body);
     // Check if the employee exists
     const employee = await Employee.findById(employeeId);
     if (!employee) {
@@ -66,7 +67,7 @@ const createLeave = async (req, res) => {
         { new: true }
       );
 
-      if (!updatedEmployee) {
+      if (!updatedLeave) {
         return res.status(404).json({ message: "Leave not found" });
       }
 

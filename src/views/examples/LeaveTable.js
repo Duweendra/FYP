@@ -61,6 +61,7 @@ const LeaveTable = () => {
   const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [status, setStatus] = useState("Pending");
 
   const fetchScans = async (page = 1, limit = 5) => {
     try {
@@ -109,27 +110,23 @@ const LeaveTable = () => {
     setShowModal(!showModal);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData();
-    formData.append("id", employee._id);
-    formData.append("name", employee.name);
-    formData.append("EmployeeStatus", employee.EmployeeStatus);
-    formData.append("DOB", employee.DOB);
-    formData.append("JobTitle", employee.JobTitle);
-    formData.append("JoinedDate", employee.JoinedDate);
-    formData.append("image", employee.image);
-    console.log(employee.image);
-
+  const handleSubmit = async (scan, e) => {
+    const leaveData = {
+      id: scan._id,
+      employeeId: scan.employee._id,
+      leaveType: scan.leaveType,
+      startDate: scan.startDate,
+      endDate: scan.endDate,
+      reason: scan.reason,
+      status: e.target.value,
+    };
     try {
-      const response = await axios.post("/api/employee", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await axios.post("/api/employee/leave", leaveData, {
+        headers: { "Content-Type": "application/json" },
       });
       toast.info("Saving Successful");
       fetchScans(currentPage);
       setEmployee(loadDefaultEmployeeObj);
-      toggleModal();
     } catch (err) {
       if (!err?.response) {
         console.log(err);
@@ -171,6 +168,11 @@ const LeaveTable = () => {
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "2-digit", day: "2-digit" };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handleChange = (e, scan) => {
+    setStatus(e.target.value);
+    handleSubmit(scan, e);
   };
 
   return (
@@ -230,13 +232,31 @@ const LeaveTable = () => {
                       <td>{scan.status}</td>
                       <td>
                         {" "}
-                        <FormGroup controlId="leaveStatus">
-                          <select>
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                          </select>
-                        </FormGroup>
+                        <UncontrolledDropdown>
+                          <DropdownToggle caret color="secondary">
+                            {scan.status}
+                          </DropdownToggle>
+                          <DropdownMenu>
+                            <DropdownItem
+                              value="Pending"
+                              onClick={(e) => handleChange(e, scan)}
+                            >
+                              Pending
+                            </DropdownItem>
+                            <DropdownItem
+                              value="Approved"
+                              onClick={(e) => handleChange(e, scan)}
+                            >
+                              Approved
+                            </DropdownItem>
+                            <DropdownItem
+                              value="Rejected"
+                              onClick={(e) => handleChange(e, scan)}
+                            >
+                              Rejected
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </UncontrolledDropdown>
                       </td>
                     </tr>
                   ))}
