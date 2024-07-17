@@ -8,6 +8,7 @@ import multer from "multer";
 import path from "path";
 import Employee from "../models/Employee.js";
 import Leave from "../models/Leave.js";
+import Attendance from "../models/Attendance.js";
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -75,6 +76,98 @@ const createLeave = async (req, res) => {
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+const createOrUpdateAttendance = async (req, res) => {
+  const {
+    id,
+    employeeId,
+    date,
+    status,
+    regularTime,
+    extraTime,
+    totalLeaveTime,
+    notes,
+  } = req.body;
+
+  try {
+    console.log(req.body);
+    // Check if the employee exists
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    // Calculate totalTime
+    const totalTime =
+      (regularTime || 0) + (extraTime || 0) - (totalLeaveTime || 0);
+
+    if (id == -1 || id == null) {
+      // Create a new attendance record
+      const attendance = new Attendance({
+        employee: employeeId,
+        date,
+        status,
+        regularTime,
+        extraTime,
+        totalLeaveTime,
+        totalTime,
+        notes,
+      });
+      await attendance.save();
+      res.status(201).json({ attendanceInfo: attendance });
+    } else {
+      const updatedAttendance = await Attendance.findByIdAndUpdate(
+        id,
+        {
+          employee: employeeId,
+          date,
+          status,
+          regularTime,
+          extraTime,
+          totalLeaveTime,
+          totalTime,
+          notes,
+        },
+        { new: true }
+      );
+
+      if (!updatedAttendance) {
+        return res.status(404).json({ message: "Attendance record not found" });
+      }
+
+      res.status(200).json({ attendanceInfo: updatedAttendance });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getAttendance = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const attendances = await Attendance.find()
+      .limit(limit)
+      .skip(startIndex)
+      .populate("employee");
+
+    const totalAttendances = await Attendance.countDocuments();
+    const totalPages = Math.ceil(totalAttendances / limit);
+
+    res.json({
+      currentPage: page,
+      totalPages: totalPages,
+      totalAttendances: totalAttendances,
+      attendances: attendances,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -218,4 +311,6 @@ export {
   getEmployee,
   createLeave,
   getLeave,
+  createOrUpdateAttendance,
+  getAttendance,
 };
