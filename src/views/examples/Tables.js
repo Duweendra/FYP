@@ -31,6 +31,7 @@ import {
 // core components
 import Header from "components/Headers/Header.js";
 import ReactDatetimeClass from "react-datetime";
+import Navspills from "./navpills";
 
 const loadDefaultEmployeeObj = () => {
   return {
@@ -168,6 +169,10 @@ const Tables = () => {
     fetchScans(newPage);
   };
 
+  const setEmployeeDetails = (e, state) => {
+    setEmployee({ ...employee, [state]: e });
+  };
+
   return (
     <>
       <Header />
@@ -235,12 +240,13 @@ const Tables = () => {
         </Row>
 
         <Modal
-          className="modal-dialog-centered modal-danger"
-          contentClassName="bg-gradient-primary"
+          className="modal-dialog-centered"
+          size="lg"
           isOpen={showModal}
           toggle={toggleModal}
         >
           <div className="modal-header">
+            <h2>Add Employee</h2>
             <button
               aria-label="Close"
               className="close"
@@ -252,93 +258,12 @@ const Tables = () => {
             </button>
           </div>
           <div className="modal-body">
-            <div className="center-content p-3">
-              <h2>Add Employee</h2>
-              {selectedImage && (
-                <img
-                  src={selectedImage}
-                  alt="Selected Scan"
-                  style={{ width: "200px", height: "auto" }}
-                />
-              )}
-            </div>
-            <form onSubmit={handleSubmit}>
-              <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Employee Full Name"
-                    type="text"
-                    value={employee.name}
-                    onChange={(e) =>
-                      setEmployee({ ...employee, name: e.target.value })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    color="info"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                      <i className="ni ni-calendar-grid-58" />
-                    </InputGroupText>
-                  </InputGroupAddon>
-                  <ReactDatetimeClass
-                    inputProps={{
-                      placeholder: "Employee Joined Date",
-                    }}
-                    timeFormat={false}
-                    value={employee.JoinedDate}
-                    onChange={(date) =>
-                      setEmployee({ ...employee, JoinedDate: date.toDate() })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Job Title"
-                    type="text"
-                    value={employee.JobTitle}
-                    onChange={(e) =>
-                      setEmployee({ ...employee, JobTitle: e.target.value })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Employee Status"
-                    type="text"
-                    value={employee.EmployeeStatus}
-                    onChange={(e) =>
-                      setEmployee({
-                        ...employee,
-                        EmployeeStatus: e.target.value,
-                      })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-              <Button
-                color="secondary"
-                style={{ float: "right" }}
-                type="submit"
-              >
-                Save
-              </Button>
-            </form>
+            <Navspills
+              employee={employee}
+              setEmployeeDetails={setEmployeeDetails}
+              selectedImage={selectedImage}
+              handleImageUpload={handleImageUpload}
+            />
           </div>
         </Modal>
       </Container>
