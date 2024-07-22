@@ -28,7 +28,7 @@ class Navspills extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      circledNavPills: 3,
+      circledNavPills: 1,
     };
   }
   toggleNavs = (e, state, index) => {
@@ -37,9 +37,29 @@ class Navspills extends React.Component {
       [state]: index,
     });
   };
+
+  PushNaves = (push) => {
+    let nav = this.state.circledNavPills;
+    if (push === "next") {
+      if (nav == 3) {
+      } else {
+        this.setState({ circledNavPills: nav + 1 });
+      }
+    } else if (push === "prev") {
+      if (nav !== 1) {
+        this.setState({ circledNavPills: nav - 1 });
+      }
+    }
+  };
+
   render() {
-    const { selectedImage, employee, setEmployeeDetails, handleImageUpload } =
-      this.props;
+    const {
+      selectedImage,
+      employee,
+      setEmployeeDetails,
+      handleImageUpload,
+      handleSubmit,
+    } = this.props;
     return (
       <>
         <div className="nav-wrapper">
@@ -108,18 +128,6 @@ class Navspills extends React.Component {
                   <FormGroup className="mb-3">
                     <InputGroup className="input-group-alternative">
                       <Input
-                        placeholder="Employee Full Name"
-                        type="text"
-                        value={employee.name}
-                        onChange={(e) =>
-                          setEmployeeDetails(e.target.value, "name")
-                        }
-                      />
-                    </InputGroup>
-                  </FormGroup>
-                  <FormGroup className="mb-3">
-                    <InputGroup className="input-group-alternative">
-                      <Input
                         color="info"
                         type="file"
                         accept="image/*"
@@ -127,56 +135,149 @@ class Navspills extends React.Component {
                       />
                     </InputGroup>
                   </FormGroup>
-                  <FormGroup>
-                    <InputGroup className="input-group-alternative">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="ni ni-calendar-grid-58" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <ReactDatetimeClass
-                        inputProps={{
-                          placeholder: "Employee Joined Date",
-                        }}
-                        timeFormat={false}
-                        value={employee.JoinedDate}
-                        onChange={(date) =>
-                          setEmployeeDetails(date.toDate(), "JoinedDate")
-                        }
-                      />
-                    </InputGroup>
+                  <FormGroup className="mb-3">
+                    <Row>
+                      <Col sm="3">Name</Col>
+                      <Col sm="9">
+                        <InputGroup className="input-group-alternative">
+                          <Input
+                            placeholder="Employee Full Name"
+                            type="text"
+                            value={employee.name}
+                            onChange={(e) =>
+                              setEmployeeDetails(e.target.value, "name")
+                            }
+                          />
+                        </InputGroup>
+                      </Col>
+                    </Row>
                   </FormGroup>
                   <FormGroup>
-                    <InputGroup className="input-group-alternative">
-                      <Input
-                        placeholder="Job Title"
-                        type="text"
-                        value={employee.JobTitle}
-                        onChange={(e) =>
-                          setEmployeeDetails(e.target.value, "JobTitle")
-                        }
-                      />
-                    </InputGroup>
+                    <Row>
+                      <Col sm="3">DOB</Col>
+                      <Col sm="9">
+                        <InputGroup className="input-group-alternative">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                              <i className="ni ni-calendar-grid-58" />
+                            </InputGroupText>
+                          </InputGroupAddon>
+                          <ReactDatetimeClass
+                            inputProps={{
+                              placeholder: "Employee Birthday",
+                            }}
+                            timeFormat={false}
+                            value={employee.DOB}
+                            onChange={(date) =>
+                              setEmployeeDetails(date.toDate(), "DOB")
+                            }
+                          />
+                        </InputGroup>
+                      </Col>
+                    </Row>
                   </FormGroup>
                   <FormGroup>
-                    <InputGroup className="input-group-alternative">
-                      <Input
-                        placeholder="Employee Status"
-                        type="text"
-                        value={employee.EmployeeStatus}
-                        onChange={(e) =>
-                          setEmployeeDetails(e.target.value, "EmployeeStatus")
-                        }
-                      />
-                    </InputGroup>
+                    <Row>
+                      <Col sm="3">Gender</Col>
+                      <Col sm="9">
+                        <UncontrolledDropdown>
+                          <DropdownToggle caret color="secondary">
+                            {employee.Gender}
+                          </DropdownToggle>
+                          <DropdownMenu>
+                            <DropdownItem
+                              value="Female"
+                              onClick={(e) =>
+                                setEmployeeDetails(e.target.value, "Gender")
+                              }
+                            >
+                              Female
+                            </DropdownItem>
+                            <DropdownItem
+                              value="Male"
+                              onClick={(e) =>
+                                setEmployeeDetails(e.target.value, "Gender")
+                              }
+                            >
+                              Male
+                            </DropdownItem>
+                            <DropdownItem
+                              value="Non-Binary"
+                              onClick={(e) =>
+                                setEmployeeDetails(e.target.value, "Gender")
+                              }
+                            >
+                              Non-Binary
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </UncontrolledDropdown>
+                      </Col>
+                    </Row>
                   </FormGroup>
-                  <Button
-                    color="secondary"
-                    style={{ float: "right" }}
-                    type="submit"
-                  >
-                    Save
-                  </Button>
+                  <FormGroup>
+                    <Row>
+                      <Col sm="3">Marital Status</Col>
+                      <Col sm="9">
+                        <UncontrolledDropdown>
+                          <DropdownToggle caret color="secondary">
+                            {employee.MaritalStatus}
+                          </DropdownToggle>
+                          <DropdownMenu>
+                            <DropdownItem
+                              value="Married"
+                              onClick={(e) =>
+                                setEmployeeDetails(
+                                  e.target.value,
+                                  "MaritalStatus"
+                                )
+                              }
+                            >
+                              Married
+                            </DropdownItem>
+                            <DropdownItem
+                              value="Single"
+                              onClick={(e) =>
+                                setEmployeeDetails(
+                                  e.target.value,
+                                  "MaritalStatus"
+                                )
+                              }
+                            >
+                              Single
+                            </DropdownItem>
+                            <DropdownItem
+                              value="Other"
+                              onClick={(e) =>
+                                setEmployeeDetails(
+                                  e.target.value,
+                                  "MaritalStatus"
+                                )
+                              }
+                            >
+                              Other
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </UncontrolledDropdown>
+                      </Col>
+                    </Row>
+                  </FormGroup>
+                  <FormGroup>
+                    <Row>
+                      <Col sm="3">NIC</Col>
+                      <Col sm="9">
+                        <InputGroup className="input-group-alternative">
+                          <Input
+                            placeholder="National Identity Card number"
+                            type="text"
+                            value={employee.NIC}
+                            onChange={(e) =>
+                              setEmployeeDetails(e.target.value, "NIC")
+                            }
+                          />
+                        </InputGroup>
+                      </Col>
+                    </Row>
+                  </FormGroup>
                 </form>
               </TabPane>
               <TabPane tabId="tabs2">
@@ -245,28 +346,28 @@ class Navspills extends React.Component {
                           </DropdownToggle>
                           <DropdownMenu>
                             <DropdownItem
-                              value="Pending"
+                              value="SE"
                               onClick={(e) =>
                                 setEmployeeDetails(e.target.value, "JobTitle")
                               }
                             >
-                              Pending
+                              SE
                             </DropdownItem>
                             <DropdownItem
-                              value="Approved"
+                              value="QA"
                               onClick={(e) =>
                                 setEmployeeDetails(e.target.value, "JobTitle")
                               }
                             >
-                              Approved
+                              QA
                             </DropdownItem>
                             <DropdownItem
-                              value="Rejected"
+                              value="Manager"
                               onClick={(e) =>
                                 setEmployeeDetails(e.target.value, "JobTitle")
                               }
                             >
-                              Rejected
+                              Manager
                             </DropdownItem>
                           </DropdownMenu>
                         </UncontrolledDropdown>
@@ -320,25 +421,73 @@ class Navspills extends React.Component {
                       </Col>
                     </Row>
                   </FormGroup>
-                  <Button
-                    color="secondary"
-                    style={{ float: "right" }}
-                    type="submit"
-                  >
-                    Save
-                  </Button>
                 </form>
               </TabPane>
               <TabPane tabId="tabs3">
-                <p className="description">
-                  Raw denim you probably haven't heard of them jean shorts
-                  Austin. Nesciunt tofu stumptown aliqua, retro synth master
-                  cleanse. Mustache cliche tempor, williamsburg carles vegan
-                  helvetica. Reprehenderit butcher retro keffiyeh dreamcatcher
-                  synth.
-                </p>
+                <FormGroup>
+                  <Row>
+                    <Col sm="3">Manager</Col>
+                    <Col sm="9">
+                      <UncontrolledDropdown>
+                        <DropdownToggle caret color="secondary">
+                          {employee.Manager}
+                        </DropdownToggle>
+                        <DropdownMenu>
+                          <DropdownItem
+                            value="Manager1"
+                            onClick={(e) =>
+                              setEmployeeDetails(e.target.value, "Manager")
+                            }
+                          >
+                            Manager1
+                          </DropdownItem>
+                          <DropdownItem
+                            value="Manager2"
+                            onClick={(e) =>
+                              setEmployeeDetails(e.target.value, "Manager")
+                            }
+                          >
+                            Manager2
+                          </DropdownItem>
+                          <DropdownItem
+                            value="Manager3"
+                            onClick={(e) =>
+                              setEmployeeDetails(e.target.value, "Manager")
+                            }
+                          >
+                            Manager3
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </UncontrolledDropdown>
+                    </Col>
+                  </Row>
+                </FormGroup>
               </TabPane>
             </TabContent>
+            <Button
+              color="secondary"
+              className={this.state.circledNavPills === 1 && "d-none"}
+              style={{ float: "left" }}
+              onClick={() => this.PushNaves("prev")}
+            >
+              Prev
+            </Button>
+            <Button
+              color="secondary"
+              className={this.state.circledNavPills === 3 && "d-none"}
+              style={{ float: "right" }}
+              onClick={() => this.PushNaves("next")}
+            >
+              Next
+            </Button>
+            <Button
+              color="secondary"
+              className={this.state.circledNavPills !== 3 && "d-none"}
+              style={{ float: "right" }}
+              onClick={handleSubmit}
+            >
+              Save
+            </Button>
           </CardBody>
         </Card>
       </>

@@ -260,6 +260,7 @@ const Tables = () => {
           <div className="modal-body">
             <Navspills
               employee={employee}
+              handleSubmit={handleSubmit}
               setEmployeeDetails={setEmployeeDetails}
               selectedImage={selectedImage}
               handleImageUpload={handleImageUpload}
