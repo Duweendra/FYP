@@ -23,6 +23,7 @@ import {
   Col,
 } from "reactstrap";
 import ReactDatetimeClass from "react-datetime";
+import { toast } from "react-toastify";
 
 class Navspills extends React.Component {
   constructor(props) {
@@ -40,10 +41,34 @@ class Navspills extends React.Component {
 
   PushNaves = (push) => {
     let nav = this.state.circledNavPills;
+    let validate = this.props.validateEmployee;
     if (push === "next") {
-      if (nav == 3) {
+      if (validate(nav)) {
+        if (nav == 3) {
+        } else {
+          this.setState({ circledNavPills: nav + 1 });
+        }
       } else {
-        this.setState({ circledNavPills: nav + 1 });
+        toast.warn("Please Fill required Feilds");
+      }
+    } else if (push === "prev") {
+      if (nav !== 1) {
+        this.setState({ circledNavPills: nav - 1 });
+      }
+    }
+  };
+
+  PushbuttonNaves = (push) => {
+    let nav = this.state.circledNavPills;
+    let validate = this.props.validateEmployee;
+    if (push === "next") {
+      if (validate(nav)) {
+        if (nav == 3) {
+        } else {
+          this.setState({ circledNavPills: nav + 1 });
+        }
+      } else {
+        toast.warn("Please Fill required Feilds");
       }
     } else if (push === "prev") {
       if (nav !== 1) {
@@ -59,24 +84,29 @@ class Navspills extends React.Component {
       setEmployeeDetails,
       handleImageUpload,
       handleSubmit,
+      validateEmployee,
     } = this.props;
     return (
       <>
         <div className="nav-wrapper">
-          <Nav className="nav-pills-circle" id="tabs_2" pills role="tablist">
+          <Nav
+            className="nav-pills-circle"
+            style={{ justifyContent: "space-evenly" }}
+            id="tabs_2"
+            pills
+            role="tablist"
+          >
             <NavItem>
               <NavLink
                 aria-selected={this.state.circledNavPills === 1}
                 className={classnames("rounded-circle", {
                   active: this.state.circledNavPills === 1,
                 })}
-                onClick={(e) => this.toggleNavs(e, "circledNavPills", 1)}
+                // onClick={(e) => this.toggleNavs(e, "circledNavPills", 1)}
                 href="#pablo"
                 role="tab"
               >
-                <span className="nav-link-icon d-block">
-                  <i className="ni ni-atom" />
-                </span>
+                <span className="nav-link-icon d-block">1</span>
               </NavLink>
             </NavItem>
             <NavItem>
@@ -85,13 +115,11 @@ class Navspills extends React.Component {
                 className={classnames("rounded-circle", {
                   active: this.state.circledNavPills === 2,
                 })}
-                onClick={(e) => this.toggleNavs(e, "circledNavPills", 2)}
+                //onClick={(e) => this.toggleNavs(e, "circledNavPills", 2)}
                 href="#pablo"
                 role="tab"
               >
-                <span className="nav-link-icon d-block">
-                  <i className="ni ni-chat-round" />
-                </span>
+                <span className="nav-link-icon d-block">2</span>
               </NavLink>
             </NavItem>
             <NavItem>
@@ -100,13 +128,11 @@ class Navspills extends React.Component {
                 className={classnames("rounded-circle", {
                   active: this.state.circledNavPills === 3,
                 })}
-                onClick={(e) => this.toggleNavs(e, "circledNavPills", 3)}
+                // onClick={(e) => this.toggleNavs(e, "circledNavPills", 3)}
                 href="#pablo"
                 role="tab"
               >
-                <span className="nav-link-icon d-block">
-                  <i className="ni ni-cloud-download-95" />
-                </span>
+                <span className="nav-link-icon d-block">3</span>
               </NavLink>
             </NavItem>
           </Nav>
@@ -380,7 +406,7 @@ class Navspills extends React.Component {
                       <Col sm="9">
                         <UncontrolledDropdown>
                           <DropdownToggle caret color="secondary">
-                            {employee.EmploymentStatus}
+                            {employee.EmployeeStatus}
                           </DropdownToggle>
                           <DropdownMenu>
                             <DropdownItem
@@ -388,7 +414,7 @@ class Navspills extends React.Component {
                               onClick={(e) =>
                                 setEmployeeDetails(
                                   e.target.value,
-                                  "EmploymentStatus"
+                                  "EmployeeStatus"
                                 )
                               }
                             >
@@ -399,7 +425,7 @@ class Navspills extends React.Component {
                               onClick={(e) =>
                                 setEmployeeDetails(
                                   e.target.value,
-                                  "EmploymentStatus"
+                                  "EmployeeStatus"
                                 )
                               }
                             >
@@ -410,7 +436,7 @@ class Navspills extends React.Component {
                               onClick={(e) =>
                                 setEmployeeDetails(
                                   e.target.value,
-                                  "EmploymentStatus"
+                                  "EmployeeStatus"
                                 )
                               }
                             >
@@ -481,7 +507,7 @@ class Navspills extends React.Component {
               Next
             </Button>
             <Button
-              color="secondary"
+              color="success"
               className={this.state.circledNavPills !== 3 && "d-none"}
               style={{ float: "right" }}
               onClick={handleSubmit}

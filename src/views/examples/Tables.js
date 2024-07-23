@@ -32,17 +32,23 @@ import {
 import Header from "components/Headers/Header.js";
 import ReactDatetimeClass from "react-datetime";
 import Navspills from "./navpills";
+import { validate } from "schema-utils";
 
 const loadDefaultEmployeeObj = () => {
   return {
     _id: -1,
     name: "",
     DOB: new Date(),
-    Gender: "",
+    Gender: "Male",
     JoinedDate: new Date(),
     EmployeeStatus: "",
     JobTitle: "",
     image: "",
+    PermanencyDate: new Date(),
+    ProbationEndDate: new Date(),
+    NIC: "",
+    MaritalStatus: "Single",
+    Manager: "",
   };
 };
 
@@ -173,6 +179,56 @@ const Tables = () => {
     setEmployee({ ...employee, [state]: e });
   };
 
+  const validateEmployee = (nav) => {
+    console.log("nav", nav);
+    console.log("employee", employee);
+    if (nav === 1) {
+      if (employee.name === "" || employee.name === null) {
+        return false;
+      } else if (employee.DOB == "" || employee.DOB === null) {
+        return false;
+      } else if (employee.Gender === "" || employee.Gender === null) {
+        return false;
+      } else if (
+        employee.MaritalStatus === null ||
+        employee.MaritalStatus === ""
+      ) {
+        return false;
+      } else if (employee.NIC === null || employee.NIC === "") {
+        return false;
+      } else {
+        return true;
+      }
+    } else if (nav === 2) {
+      if (
+        employee.ProbationEndDate === "" ||
+        employee.ProbationEndDate === null
+      ) {
+        return false;
+      } else if (
+        employee.PermanencyDate === "" ||
+        employee.PermanencyDate === null
+      ) {
+        return false;
+      } else if (employee.JobTitle == null || employee.JobTitle === "") {
+        return false;
+      } else if (
+        employee.EmployeeStatus == null ||
+        employee.EmployeeStatus == ""
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    } else if (nav === 3) {
+      if (employee.Manager === null || employee.Manager === "") {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
   return (
     <>
       <Header />
@@ -242,6 +298,7 @@ const Tables = () => {
         <Modal
           className="modal-dialog-centered"
           size="lg"
+          style={{ height: "700px" }}
           isOpen={showModal}
           toggle={toggleModal}
         >
@@ -264,6 +321,7 @@ const Tables = () => {
               setEmployeeDetails={setEmployeeDetails}
               selectedImage={selectedImage}
               handleImageUpload={handleImageUpload}
+              validateEmployee={validateEmployee}
             />
           </div>
         </Modal>
