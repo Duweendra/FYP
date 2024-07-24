@@ -7,6 +7,7 @@ import Tables from "views/examples/Tables.js";
 import Icons from "views/examples/Icons.js";
 import LeaveTable from "views/examples/LeaveTable";
 import AttendanceTable from "views/examples/AttendanceTable";
+import PayrollTable from "views/examples/PayrollTable";
 
 var routes = [
   {
@@ -33,8 +34,15 @@ var routes = [
   {
     path: "/attendance",
     name: "Attendance",
-    icon: "ni ni-briefcase-24 text-green",
+    icon: "ni ni-briefcase-24 text-purple",
     component: <AttendanceTable />,
+    layout: "/admin",
+  },
+  {
+    path: "/payroll",
+    name: "Payroll",
+    icon: "ni ni-money-coins text-green",
+    component: <PayrollTable />,
     layout: "/admin",
   },
   {

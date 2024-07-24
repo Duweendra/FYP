@@ -28,6 +28,8 @@ const EmployeeSchema = new Schema(
       type: String,
       required: true,
     },
+    salaryRate: Number,
+    overtimeRate: Number,
     image: {
       type: String,
     },

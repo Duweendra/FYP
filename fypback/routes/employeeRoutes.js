@@ -11,6 +11,7 @@ import {
   getLeave,
   createOrUpdateAttendance,
   getAttendance,
+  createPayroll,
 } from "../controllers/userController.js";
 import upload from "../config/multer.js";
 const router = Router();
@@ -21,4 +22,5 @@ router.post("/leave", createLeave);
 router.get("/leave", getLeave);
 router.post("/attendance", createOrUpdateAttendance);
 router.get("/attendance", getAttendance);
+router.post("/payroll", createPayroll);
 export default router;

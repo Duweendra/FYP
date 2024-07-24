@@ -9,6 +9,7 @@ import path from "path";
 import Employee from "../models/Employee.js";
 import Leave from "../models/Leave.js";
 import Attendance from "../models/Attendance.js";
+import Payroll from "../models/Payroll.js";
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -198,8 +199,6 @@ const getLeave = async (req, res) => {
   }
 };
 
-export default createLeave;
-
 const createOrUpdateEmployee = async (req, res) => {
   const { id, name, JobTitle, JoinedDate, EmployeeStatus } = req.body;
   const imagePath = req.file ? req.file.path : null;
@@ -303,9 +302,64 @@ const loginUser = async (req, res) => {
   }
 };
 
+const createPayroll = async (req, res) => {
+  const { employeeId, payPeriodStart, payPeriodEnd } = req.body;
+
+  try {
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
+
+    const timeRecords = await Attendance.find({
+      employee: employee.id,
+      date: { $gte: payPeriodStart, $lte: payPeriodEnd },
+    });
+
+    const regularHours = timeRecords.reduce(
+      (sum, record) => sum + record.regularTime,
+      0
+    );
+    const overtimeHours = timeRecords.reduce(
+      (sum, record) => sum + record.extraTime,
+      0
+    );
+
+    const regularSalary = regularHours * employee.salaryRate;
+    const overtimeSalary = overtimeHours * employee.overtimeRate;
+    const grossSalary = regularSalary + overtimeSalary;
+
+    const taxes = calculateTaxes(grossSalary);
+    const netSalary = grossSalary - taxes;
+
+    const payrollRecord = new Payroll({
+      employeeId,
+      payPeriodStart,
+      payPeriodEnd,
+      regularHours,
+      overtimeHours,
+      totalHours: regularHours + overtimeHours,
+      grossSalary,
+      taxes,
+      netSalary,
+    });
+
+    await payrollRecord.save();
+    res.status(200).json({ payrollRecord: payrollRecord });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const calculateTaxes = (grossSalary) => {
+  const taxRate = 0.2; // Example tax rate
+  return grossSalary * taxRate;
+};
+
 export {
   getUsers,
   createUser,
+  createPayroll,
   loginUser,
   createOrUpdateEmployee,
   getEmployee,
