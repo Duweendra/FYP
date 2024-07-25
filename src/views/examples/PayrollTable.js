@@ -66,10 +66,10 @@ const PayrollTable = () => {
   const fetchScans = async (page = 1, limit = 5) => {
     try {
       const response = await axios.get(
-        `/api/employee/attendance?page=${page}&limit=${limit}`
+        `/api/employee/payroll?page=${page}&limit=${limit}`
       );
-      setScans(response?.data?.attendances ?? []);
-      setTotalPages(response?.data?.totalAttendances ?? 1); // Assuming you have a state for total pages
+      setScans(response?.data?.payrolls ?? []);
+      setTotalPages(response?.data?.totalPayrolls ?? 1); // Assuming you have a state for total pages
       setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {

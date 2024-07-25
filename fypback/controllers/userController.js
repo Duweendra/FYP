@@ -351,6 +351,30 @@ const createPayroll = async (req, res) => {
   }
 };
 
+const getPayroll = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const payrolls = await Payroll.find().limit(limit).skip(startIndex);
+
+    const totalPayrolls = await Payroll.countDocuments();
+    const totalPages = Math.ceil(totalPayrolls / limit);
+
+    res.json({
+      currentPage: page,
+      totalPages: totalPages,
+      totalPayrolls: totalPayrolls,
+      payrolls: payrolls,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const calculateTaxes = (grossSalary) => {
   const taxRate = 0.2; // Example tax rate
   return grossSalary * taxRate;
@@ -364,6 +388,7 @@ export {
   createOrUpdateEmployee,
   getEmployee,
   createLeave,
+  getPayroll,
   getLeave,
   createOrUpdateAttendance,
   getAttendance,
