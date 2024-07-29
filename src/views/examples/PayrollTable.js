@@ -27,6 +27,7 @@ import {
   Modal,
   InputGroupAddon,
   InputGroupText,
+  Col,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
@@ -45,8 +46,18 @@ const loadDefaultEmployeeObj = () => {
   };
 };
 
+const loadDefaultPayrollObj = () => {
+  return {
+    _id: -1,
+    employeeId: -1,
+    payPeriodStart: new Date(),
+    payPeriodEnd: new Date(),
+  };
+};
+
 const PayrollTable = () => {
   const [scans, setScans] = useState([]);
+  const [employs, setEmplos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -56,6 +67,7 @@ const PayrollTable = () => {
   const [pid, setPid] = useState("");
   const [note, setNote] = useState("");
   const [employee, setEmployee] = useState(loadDefaultEmployeeObj);
+  const [payroll, setPayroll] = useState(loadDefaultPayrollObj);
   const [errMsg, setErrMsg] = useState("");
   const [page, setpage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -77,8 +89,23 @@ const PayrollTable = () => {
       setLoading(false);
     }
   };
+  const fetchEmployees = async (page = 1, limit = 5) => {
+    try {
+      const response = await axios.get(
+        `/api/employee/?page=${page}&limit=${limit}`
+      );
+      setEmplos(response?.data?.employees ?? []);
+      //setTotalPages(response?.data?.totalPages ?? 1); // Assuming you have a state for total pages
+      //setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    fetchScans();
+    // fetchScans();
+    fetchEmployees();
   }, []);
 
   const handleRowClick = (scan) => {
@@ -111,22 +138,15 @@ const PayrollTable = () => {
   };
 
   const handleSubmit = async (scan, e) => {
-    const leaveData = {
-      id: scan._id,
-      employeeId: scan.employee._id,
-      leaveType: scan.leaveType,
-      startDate: scan.startDate,
-      endDate: scan.endDate,
-      reason: scan.reason,
-      status: e.target.value,
-    };
     try {
-      const response = await axios.post("/api/employee/attendance", leaveData, {
+      console.log("payroll", payroll);
+      const response = await axios.post("/api/employee/payroll", payroll, {
         headers: { "Content-Type": "application/json" },
       });
-      toast.info("Saving Successful");
-      fetchScans(currentPage);
-      setEmployee(loadDefaultEmployeeObj);
+      toast.info("Calculation Successful");
+      // fetchScans(currentPage);
+      // setEmployee(loadDefaultEmployeeObj);
+      // setPayroll(loadDefaultPayrollObj);
     } catch (err) {
       if (!err?.response) {
         console.log(err);
@@ -173,6 +193,16 @@ const PayrollTable = () => {
   const handleChange = (e, scan) => {
     setStatus(e.target.value);
     handleSubmit(scan, e);
+  };
+
+  const handleEmployee = (itm) => {
+    setEmployee(itm);
+    setPayroll({ ...payroll, employeeId: itm.id });
+    console.log();
+  };
+
+  const setPayrollDetails = (e, state) => {
+    setPayroll({ ...payroll, [state]: e });
   };
 
   return (
@@ -283,6 +313,9 @@ const PayrollTable = () => {
           toggle={toggleModal}
         >
           <div className="modal-header">
+            <div className="center-content ">
+              <h2>Calculate Payroll</h2>
+            </div>
             <button
               aria-label="Close"
               className="close"
@@ -294,91 +327,86 @@ const PayrollTable = () => {
             </button>
           </div>
           <div className="modal-body">
-            <div className="center-content p-3">
-              <h2>Add Employee</h2>
-              {selectedImage && (
-                <img
-                  src={selectedImage}
-                  alt="Selected Scan"
-                  style={{ width: "200px", height: "auto" }}
-                />
-              )}
-            </div>
             <form onSubmit={handleSubmit}>
-              <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Employee Full Name"
-                    type="text"
-                    value={employee.name}
-                    onChange={(e) =>
-                      setEmployee({ ...employee, name: e.target.value })
-                    }
-                  />
-                </InputGroup>
+              <FormGroup className="">
+                <Row>
+                  <Col sm="3">Employee</Col>
+                  <Col sm="9">
+                    <UncontrolledDropdown>
+                      <DropdownToggle caret color="secondary">
+                        {employee.name}
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        {employs.map((itm, idx) => (
+                          <DropdownItem
+                            key={itm._id}
+                            value={itm.name}
+                            onClick={() => handleEmployee(itm)}
+                          >
+                            {itm.name}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+                  </Col>
+                </Row>
               </FormGroup>
-              <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    color="info"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </InputGroup>
+
+              <FormGroup>
+                <Row>
+                  <Col sm="3">From Date</Col>
+                  <Col sm="9">
+                    <InputGroup className="input-group-alternative">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="ni ni-calendar-grid-58" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <ReactDatetimeClass
+                        inputProps={{
+                          placeholder: "From Date",
+                        }}
+                        timeFormat={false}
+                        value={payroll.payPeriodStart}
+                        onChange={(date) =>
+                          setPayrollDetails(date.toDate(), "payPeriodStart")
+                        }
+                      />
+                    </InputGroup>
+                  </Col>
+                </Row>
               </FormGroup>
               <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                      <i className="ni ni-calendar-grid-58" />
-                    </InputGroupText>
-                  </InputGroupAddon>
-                  <ReactDatetimeClass
-                    inputProps={{
-                      placeholder: "Employee Joined Date",
-                    }}
-                    timeFormat={false}
-                    value={employee.JoinedDate}
-                    onChange={(date) =>
-                      setEmployee({ ...employee, JoinedDate: date.toDate() })
-                    }
-                  />
-                </InputGroup>
+                <Row>
+                  <Col sm="3">To Date</Col>
+                  <Col sm="9">
+                    <InputGroup className="input-group-alternative">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="ni ni-calendar-grid-58" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <ReactDatetimeClass
+                        inputProps={{
+                          placeholder: "To Date",
+                        }}
+                        timeFormat={false}
+                        value={payroll.payPeriodEnd}
+                        onChange={(date) =>
+                          setPayrollDetails(date.toDate(), "payPeriodEnd")
+                        }
+                      />
+                    </InputGroup>
+                  </Col>
+                </Row>
               </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Job Title"
-                    type="text"
-                    value={employee.JobTitle}
-                    onChange={(e) =>
-                      setEmployee({ ...employee, JobTitle: e.target.value })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Employee Status"
-                    type="text"
-                    value={employee.EmployeeStatus}
-                    onChange={(e) =>
-                      setEmployee({
-                        ...employee,
-                        EmployeeStatus: e.target.value,
-                      })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
+
               <Button
                 color="secondary"
                 style={{ float: "right" }}
                 type="submit"
               >
-                Save
+                Calculate
               </Button>
             </form>
           </div>
