@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation, Route, Routes, Navigate } from "react-router-dom";
 // reactstrap components
@@ -7,8 +6,8 @@ import { Container } from "reactstrap";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import AdminFooter from "components/Footers/AdminFooter.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 import routes from "routes.js";
 
 const Admin = (props) => {
@@ -29,7 +28,7 @@ const Admin = (props) => {
         );
       } else {
         return null;
-      } 
+      }
     });
   };
 
@@ -52,7 +51,7 @@ const Admin = (props) => {
         routes={routes}
         logo={{
           innerLink: "/admin/index",
-          imgSrc: require("../assets/img/brand/argon-react.png"),
+          imgSrc: require("../assets/img/brand/dhrms png.png"),
           imgAlt: "...",
         }}
       />

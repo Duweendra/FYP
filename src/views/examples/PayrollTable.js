@@ -143,7 +143,9 @@ const PayrollTable = () => {
       const response = await axios.post("/api/employee/payroll", payroll, {
         headers: { "Content-Type": "application/json" },
       });
-      toast.info("Calculation Successful");
+      if (response) {
+        toast.info("Calculation Successful");
+      }
       // fetchScans(currentPage);
       // setEmployee(loadDefaultEmployeeObj);
       // setPayroll(loadDefaultPayrollObj);
@@ -153,7 +155,7 @@ const PayrollTable = () => {
         setErrMsg("No Server Response");
         toast.error("No Server Response", err);
       } else if (err.response?.status === 400) {
-        setErrMsg("Saving error");
+        setErrMsg(err.message);
         toast.error("Saving error", err);
       } else if (err.response?.status === 401) {
         setErrMsg("Unauthorized");
@@ -327,7 +329,7 @@ const PayrollTable = () => {
             </button>
           </div>
           <div className="modal-body">
-            <form onSubmit={handleSubmit}>
+            <form>
               <FormGroup className="">
                 <Row>
                   <Col sm="3">Employee</Col>
@@ -404,7 +406,7 @@ const PayrollTable = () => {
               <Button
                 color="secondary"
                 style={{ float: "right" }}
-                type="submit"
+                onClick={handleSubmit}
               >
                 Calculate
               </Button>

@@ -267,7 +267,11 @@ const Tables = () => {
                           >
                             <img
                               alt="..."
-                              src={`http://localhost:8000/${scan.image}`}
+                              src={
+                                scan.image
+                                  ? `http://localhost:8000/${scan.image}`
+                                  : require("../../assets/img/theme/user.png")
+                              }
                             />
                           </a>
                           <Media>
