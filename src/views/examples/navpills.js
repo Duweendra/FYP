@@ -28,6 +28,7 @@ import { toast } from "react-toastify";
 class Navspills extends React.Component {
   constructor(props) {
     super(props);
+    this.fileInputRef = React.createRef();
     this.state = {
       circledNavPills: 1,
     };
@@ -74,6 +75,12 @@ class Navspills extends React.Component {
       if (nav !== 1) {
         this.setState({ circledNavPills: nav - 1 });
       }
+    }
+  };
+
+  handleImageClick = () => {
+    if (this.fileInputRef.current) {
+      this.fileInputRef.current.click();
     }
   };
 
@@ -141,22 +148,39 @@ class Navspills extends React.Component {
           <CardBody>
             <TabContent activeTab={"tabs" + this.state.circledNavPills}>
               <TabPane tabId="tabs1">
-                <div className="center-content p-3">
-                  {selectedImage && (
-                    <img
-                      src={selectedImage}
-                      alt="Selected Scan"
-                      style={{ width: "200px", height: "auto" }}
-                    />
-                  )}
+                <div
+                  className="center-content p-3"
+                  onClick={this.handleImageClick}
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    src={
+                      selectedImage
+                        ? selectedImage
+                        : require("../../assets/img/theme/user.png")
+                    }
+                    alt="Selected Scan"
+                    style={{
+                      width: "200px",
+                      height: "200px",
+                      cursor: "pointer",
+                      borderRadius: "50%", // Makes the borders rounded
+                      objectFit: "cover", // Ensures the image fills the container without overflow
+                    }}
+                  />
                 </div>
                 <form /* onSubmit={handleSubmit} */>
                   <FormGroup className="mb-3">
                     <InputGroup className="input-group-alternative">
-                      <Input
+                      <input
                         color="info"
                         type="file"
                         accept="image/*"
+                        ref={this.fileInputRef}
+                        style={{ display: "none" }}
                         onChange={handleImageUpload}
                       />
                     </InputGroup>

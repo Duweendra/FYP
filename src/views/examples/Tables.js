@@ -260,20 +260,22 @@ const Tables = () => {
                     <tr key={scan._id} onClick={() => handleRowClick(scan)}>
                       <th scope="row">
                         <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={
-                                scan.image
-                                  ? `http://localhost:8000/${scan.image}`
-                                  : require("../../assets/img/theme/user.png")
-                              }
-                            />
-                          </a>
+                          <img
+                            alt="..."
+                            src={
+                              scan.image
+                                ? `http://localhost:8000/${scan.image}`
+                                : require("../../assets/img/theme/user.png")
+                            }
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              borderRadius: "50%", // Makes the borders rounded
+                              objectFit: "cover", // Ensures the image fills the container without overflow
+                              marginRight: "20px",
+                            }}
+                          />
+
                           <Media>
                             <span className="mb-0 text-sm">{scan.name}</span>
                           </Media>
