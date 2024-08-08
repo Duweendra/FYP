@@ -1,5 +1,6 @@
 import React from "react";
 import classnames from "classnames";
+import "../../assets/css/employee.css";
 // reactstrap components
 import {
   Card,
@@ -31,6 +32,7 @@ class Navspills extends React.Component {
     this.fileInputRef = React.createRef();
     this.state = {
       circledNavPills: 1,
+      IsHovered: false,
     };
   }
   toggleNavs = (e, state, index) => {
@@ -98,12 +100,21 @@ class Navspills extends React.Component {
         <div className="nav-wrapper">
           <Nav
             className="nav-pills-circle"
-            style={{ justifyContent: "space-evenly" }}
+            style={{ justifyContent: "space-evenly", position: "relative" }}
             id="tabs_2"
             pills
             role="tablist"
           >
-            <NavItem>
+            <hr
+              className="my-3"
+              style={{
+                position: "absolute",
+                border: "0.5px solid rgb(119 139 255 / 22%)",
+                width: "62%",
+                top: "24%",
+              }}
+            />
+            <NavItem style={{ zIndex: 1 }}>
               <NavLink
                 aria-selected={this.state.circledNavPills === 1}
                 className={classnames("rounded-circle", {
@@ -116,7 +127,7 @@ class Navspills extends React.Component {
                 <span className="nav-link-icon d-block">1</span>
               </NavLink>
             </NavItem>
-            <NavItem>
+            <NavItem style={{ zIndex: 1 }}>
               <NavLink
                 aria-selected={this.state.circledNavPills === 2}
                 className={classnames("rounded-circle", {
@@ -129,7 +140,7 @@ class Navspills extends React.Component {
                 <span className="nav-link-icon d-block">2</span>
               </NavLink>
             </NavItem>
-            <NavItem>
+            <NavItem style={{ zIndex: 1 }}>
               <NavLink
                 aria-selected={this.state.circledNavPills === 3}
                 className={classnames("rounded-circle", {
@@ -149,28 +160,35 @@ class Navspills extends React.Component {
             <TabContent activeTab={"tabs" + this.state.circledNavPills}>
               <TabPane tabId="tabs1">
                 <div
-                  className="center-content p-3"
+                  className="center-content p-3 imageblock"
                   onClick={this.handleImageClick}
                   style={{
                     display: "flex",
+
                     justifyContent: "center",
                   }}
+                  onMouseEnter={() => this.setState({ IsHovered: true })}
+                  onMouseLeave={() => this.setState({ IsHovered: false })}
                 >
-                  <img
-                    src={
-                      selectedImage
-                        ? selectedImage
-                        : require("../../assets/img/theme/user.png")
-                    }
-                    alt="Selected Scan"
-                    style={{
-                      width: "200px",
-                      height: "200px",
-                      cursor: "pointer",
-                      borderRadius: "50%", // Makes the borders rounded
-                      objectFit: "cover", // Ensures the image fills the container without overflow
-                    }}
-                  />
+                  <div class="middle">
+                    <img
+                      src={
+                        selectedImage
+                          ? selectedImage
+                          : require("../../assets/img/theme/user.png")
+                      }
+                      alt="Selected Scan"
+                      className="profileimage"
+                      style={{
+                        width: "200px",
+                        height: "200px",
+                        cursor: "pointer",
+                        borderRadius: "50%", // Makes the borders rounded
+                        objectFit: "cover", // Ensures the image fills the container without overflow
+                      }}
+                    />{" "}
+                    <div className="texty">Edit Profile Picture</div>
+                  </div>
                 </div>
                 <form /* onSubmit={handleSubmit} */>
                   <FormGroup className="mb-3">
