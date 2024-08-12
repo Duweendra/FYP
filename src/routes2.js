@@ -1,23 +1,15 @@
 import Index from "views/Index.js";
 import Profile from "views/examples/Profile.js";
-import Tables from "views/examples/Tables.js";
-import LeaveTable from "views/examples/LeaveTable";
+import LeaveTable from "views/User/LeaveTable";
 import AttendanceTable from "views/examples/AttendanceTable";
 import PayrollTable from "views/examples/PayrollTable";
 
-var routes = [
+var routes2 = [
   {
     path: "/index",
     name: "Dashboard",
     icon: "ni ni-tv-2 text-primary",
     component: <Index />,
-    layout: "/admin",
-  },
-  {
-    path: "/employees",
-    name: "Employee Management",
-    icon: "ni ni-bullet-list-67 text-red",
-    component: <Tables />,
     layout: "/admin",
   },
   {
@@ -49,4 +41,4 @@ var routes = [
     layout: "/admin",
   },
 ];
-export default routes;
+export default routes2;

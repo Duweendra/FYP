@@ -1,15 +1,15 @@
-
 import React from "react";
 import { useLocation, Route, Routes, Navigate } from "react-router-dom";
 // reactstrap components
 import { Container, Row, Col } from "reactstrap";
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 // core components
 import AuthNavbar from "components/Navbars/AuthNavbar.js";
 import AuthFooter from "components/Footers/AuthFooter.js";
 
 import routes from "routes.js";
+import authroutes from "authroutes";
 
 const Auth = (props) => {
   const mainContent = React.useRef(null);
@@ -77,7 +77,7 @@ const Auth = (props) => {
         <Container className="mt--8 pb-5">
           <Row className="justify-content-center">
             <Routes>
-              {getRoutes(routes)}
+              {getRoutes(authroutes)}
               <Route path="*" element={<Navigate to="/auth/login" replace />} />
             </Routes>
           </Row>

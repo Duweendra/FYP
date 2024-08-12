@@ -9,10 +9,14 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import routes from "routes.js";
+import useAuth from "hooks/useAuth";
+import routes2 from "routes2.js";
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
   const location = useLocation();
+
+  const { setAuth, auth } = useAuth();
 
   React.useEffect(() => {
     document.documentElement.scrollTop = 0;
@@ -48,7 +52,7 @@ const Admin = (props) => {
     <>
       <Sidebar
         {...props}
-        routes={routes}
+        routes={auth?.newUser?.isAdmin ? routes : routes2}
         logo={{
           innerLink: "/admin/index",
           imgSrc: require("../assets/img/brand/dhrms png.png"),
@@ -61,7 +65,7 @@ const Admin = (props) => {
           brandText={getBrandText(props?.location?.pathname)}
         />
         <Routes>
-          {getRoutes(routes)}
+          {getRoutes(auth?.newUser?.isAdmin ? routes : routes2)}
           <Route path="*" element={<Navigate to="/admin/index" replace />} />
         </Routes>
         <Container fluid>
