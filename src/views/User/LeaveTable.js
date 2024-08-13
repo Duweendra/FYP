@@ -171,7 +171,7 @@ const LeaveTable = () => {
   const handleSubmit = async (scan, e) => {
     const leaveData = {
       id: leave.id,
-      employeeId: auth?.newUser?._id,
+      employeeId: auth?.newUser?.employee?._id,
       leaveType: leave.leaveType,
       startDate: leave.startDate,
       endDate: leave.endDate,
@@ -184,7 +184,8 @@ const LeaveTable = () => {
       });
       toast.info("Saving Successful");
       fetchScans(currentPage);
-      //setEmployee(loadDefaultEmployeeObj);
+      setLeave(loadDefaultLeaveObj);
+      setShowModal(false);
     } catch (err) {
       if (!err?.response) {
         console.log(err);
@@ -385,7 +386,7 @@ const LeaveTable = () => {
                               placeholder: "Leave End Date",
                             }}
                             timeFormat={false}
-                            value={leave.startDate}
+                            value={leave.endDate}
                             onChange={(date) =>
                               setLeaveDetails(date.toDate(), "endDate")
                             }

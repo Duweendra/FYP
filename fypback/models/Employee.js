@@ -20,6 +20,12 @@ const EmployeeSchema = new Schema(
     JoinedDate: {
       type: Date,
     },
+    ProbationEndDate: {
+      type: Date,
+    },
+    NIC: {
+      type: String,
+    },
     JobTitle: {
       type: String,
       required: true,

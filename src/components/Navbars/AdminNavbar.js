@@ -1,4 +1,4 @@
-import useAuth from '../../hooks/useAuth';
+import useAuth from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
 // reactstrap components
 import {
@@ -19,17 +19,16 @@ import {
 } from "reactstrap";
 
 const AdminNavbar = (props) => {
-  const { setAuth ,auth} = useAuth();
+  const { setAuth, auth } = useAuth();
 
   const logout = async () => {
     try {
       localStorage.clear();
       setAuth();
-    } 
-   catch (error) {
-          console.log(error);         
-   }
-  }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -59,19 +58,25 @@ const AdminNavbar = (props) => {
                   <span className="avatar avatar-sm rounded-circle">
                     <img
                       alt="..."
-                      src={require("../../assets/img/theme/user.png")}
+                      src={
+                        auth?.newUser?.employee
+                          ? `http://localhost:8000/${auth?.newUser?.employee?.image}`
+                          : require("../../assets/img/theme/user.png")
+                      }
                     />
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                    {auth?.newUser?.name}
+                      {auth?.newUser?.name}
                     </span>
                   </Media>
                 </Media>
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-arrow" right>
                 <DropdownItem className="noti-title" header tag="div">
-                  <h6 className="text-overflow m-0">Welcome  {auth?.newUser?.name} !</h6>
+                  <h6 className="text-overflow m-0">
+                    Welcome {auth?.newUser?.name} !
+                  </h6>
                 </DropdownItem>
                 <DropdownItem to="/admin/user-profile" tag={Link}>
                   <i className="ni ni-single-02" />
@@ -92,8 +97,7 @@ const AdminNavbar = (props) => {
                 <DropdownItem divider />
                 <DropdownItem href="#pablo" onClick={() => logout()}>
                   <i className="ni ni-user-run" />
-                  <span >Logout</span>
-                 
+                  <span>Logout</span>
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>

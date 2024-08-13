@@ -1,25 +1,37 @@
 // src/models/user.js
 
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
-const UserSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
+const UserSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    employee: {
+      type: Schema.Types.ObjectId,
+      ref: "employee",
+      required: true,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
 
-const User = model('user', UserSchema);
+const User = model("user", UserSchema);
 
 export default User;

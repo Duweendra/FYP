@@ -346,10 +346,99 @@ class Navspills extends React.Component {
                       </Col>
                     </Row>
                   </FormGroup>
+                  <FormGroup>
+                    <Row>
+                      <Col sm="3">Email</Col>
+                      <Col sm="9">
+                        <InputGroup className="input-group-alternative">
+                          <Input
+                            placeholder="Email"
+                            type="text"
+                            value={employee.email}
+                            onChange={(e) =>
+                              setEmployeeDetails(e.target.value, "email")
+                            }
+                          />
+                        </InputGroup>
+                      </Col>
+                    </Row>
+                  </FormGroup>
+                  <FormGroup>
+                    <Row>
+                      <Col sm="3">Password</Col>
+                      <Col sm="9">
+                        <InputGroup className="input-group-alternative">
+                          <Input
+                            placeholder="Password"
+                            type="password"
+                            value={employee.password}
+                            onChange={(e) =>
+                              setEmployeeDetails(e.target.value, "password")
+                            }
+                          />
+                        </InputGroup>
+                      </Col>
+                    </Row>
+                  </FormGroup>
+                  <FormGroup>
+                    <Row>
+                      <Col sm="3">Is a Admin ?</Col>
+                      <Col sm="9">
+                        <InputGroup className="input-group-alternative">
+                          {/*  <Input
+                            placeholder="Password"
+                            type="password"
+                            value={employee.password}
+                            onChange={(e) =>
+                              setEmployeeDetails(e.target.value, "password")
+                            }
+                          /> */}
+                          <label className="custom-toggle">
+                            <input
+                              type="checkbox"
+                              value={employee.isAdmin}
+                              onChange={(e) => {
+                                setEmployeeDetails(
+                                  !employee.isAdmin,
+                                  "isAdmin"
+                                );
+                                console.log("admin", !employee.isAdmin);
+                              }}
+                            />
+                            <span className="custom-toggle-slider rounded-circle" />
+                          </label>
+                        </InputGroup>
+                      </Col>
+                    </Row>
+                  </FormGroup>
                 </form>
               </TabPane>
               <TabPane tabId="tabs2">
                 <form /* onSubmit={handleSubmit} */>
+                  <FormGroup>
+                    <Row>
+                      <Col sm="3">Joined Date</Col>
+                      <Col sm="9">
+                        <InputGroup className="input-group-alternative">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                              <i className="ni ni-calendar-grid-58" />
+                            </InputGroupText>
+                          </InputGroupAddon>
+                          <ReactDatetimeClass
+                            inputProps={{
+                              placeholder: "Date of Permanency",
+                            }}
+                            timeFormat={false}
+                            value={employee.JoinedDate}
+                            onChange={(date) =>
+                              setEmployeeDetails(date.toDate(), "JoinedDate")
+                            }
+                          />
+                        </InputGroup>
+                      </Col>
+                    </Row>
+                  </FormGroup>
                   <FormGroup>
                     <Row>
                       <Col sm="3">Probation End Date</Col>
@@ -377,33 +466,7 @@ class Navspills extends React.Component {
                       </Col>
                     </Row>
                   </FormGroup>
-                  <FormGroup>
-                    <Row>
-                      <Col sm="3">Permanency Date</Col>
-                      <Col sm="9">
-                        <InputGroup className="input-group-alternative">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText>
-                              <i className="ni ni-calendar-grid-58" />
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <ReactDatetimeClass
-                            inputProps={{
-                              placeholder: "Date of Permanency",
-                            }}
-                            timeFormat={false}
-                            value={employee.PermanencyDate}
-                            onChange={(date) =>
-                              setEmployeeDetails(
-                                date.toDate(),
-                                "PermanencyDate"
-                              )
-                            }
-                          />
-                        </InputGroup>
-                      </Col>
-                    </Row>
-                  </FormGroup>
+
                   <FormGroup>
                     <Row>
                       <Col sm="3">Job Title</Col>

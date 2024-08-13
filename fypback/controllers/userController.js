@@ -2,10 +2,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
-import Scan from "../models/Scans.js";
-import upload from "../config/multer.js";
-import multer from "multer";
-import path from "path";
 import Employee from "../models/Employee.js";
 import Leave from "../models/Leave.js";
 import Attendance from "../models/Attendance.js";
@@ -200,7 +196,17 @@ const getLeave = async (req, res) => {
 };
 
 const createOrUpdateEmployee = async (req, res) => {
-  const { id, name, JobTitle, JoinedDate, EmployeeStatus } = req.body;
+  const {
+    id,
+    name,
+    JobTitle,
+    NIC,
+    JoinedDate,
+    EmployeeStatus,
+    email,
+    password,
+    isAdmin,
+  } = req.body;
   const imagePath = req.file ? req.file.path : null;
 
   try {
@@ -210,10 +216,21 @@ const createOrUpdateEmployee = async (req, res) => {
         name,
         JobTitle,
         JoinedDate,
+        NIC,
         EmployeeStatus,
         image: imagePath,
       });
+      const hashedPassword = await bcrypt.hash(password, 10);
       await newEmployee.save();
+
+      const user = new User({
+        name,
+        email,
+        password: hashedPassword,
+        employee: newEmployee,
+        isAdmin: isAdmin,
+      });
+      await user.save();
       res.status(201).json({ employeeinfo: newEmployee });
     } else {
       // Update existing employee
@@ -278,7 +295,7 @@ const loginUser = async (req, res) => {
 
   try {
     // Find the user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("employee");
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }

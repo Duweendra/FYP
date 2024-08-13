@@ -49,6 +49,9 @@ const loadDefaultEmployeeObj = () => {
     NIC: "",
     MaritalStatus: "Single",
     Manager: "",
+    email: "",
+    password: "",
+    isAdmin: false,
   };
 };
 
@@ -124,9 +127,14 @@ const Tables = () => {
     formData.append("name", employee.name);
     formData.append("EmployeeStatus", employee.EmployeeStatus);
     formData.append("DOB", employee.DOB);
+    formData.append("NIC", employee.NIC);
     formData.append("JobTitle", employee.JobTitle);
     formData.append("JoinedDate", employee.JoinedDate);
+    formData.append("ProbationEndDate", employee.ProbationEndDate);
+    formData.append("password", employee.password);
+    formData.append("email", employee.email);
     formData.append("image", employee.image);
+    formData.append("isAdmin", employee.isAdmin);
     console.log(employee.image);
 
     try {
