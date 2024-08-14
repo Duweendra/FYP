@@ -55,7 +55,7 @@ const loadDefaultEmployeeObj = () => {
   };
 };
 
-const Tables = () => {
+const Tables = (props) => {
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -74,6 +74,7 @@ const Tables = () => {
 
   const fetchScans = async (page = 1, limit = 5) => {
     try {
+      // props.changeLoader(true);
       const response = await axios.get(
         `/api/employee?page=${page}&limit=${limit}`
       );
@@ -81,6 +82,7 @@ const Tables = () => {
       setTotalPages(response.data.totalPages); // Assuming you have a state for total pages
       setCurrentPage(response.data.currentPage); // Assuming you have a state for current page
       setLoading(false);
+      //props.changeLoader(false);
     } catch (error) {
       setError(error.message);
       setLoading(false);
@@ -138,6 +140,7 @@ const Tables = () => {
     console.log(employee.image);
 
     try {
+      props.changeLoader(true);
       const response = await axios.post("/api/employee", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -145,7 +148,9 @@ const Tables = () => {
       fetchScans(currentPage);
       setEmployee(loadDefaultEmployeeObj);
       toggleModal();
+      props.changeLoader(false);
     } catch (err) {
+      props.changeLoader(false);
       if (!err?.response) {
         console.log(err);
         setErrMsg("No Server Response");

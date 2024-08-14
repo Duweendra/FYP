@@ -43,3 +43,29 @@
 .imageblock:hover .texty {
   opacity: 1;
 }
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it covers the content */
+}
+
+.loader {
+  width: 100px; /* Adjust size as needed */
+}
+
+.content-blurred {
+  filter: blur(5px); /* Blur the background content */
+  pointer-events: none; /* Prevent interactions with background content */
+}
+
+.content {
+  transition: filter 0.3s ease; /* Smooth transition for the blur effect */
+}

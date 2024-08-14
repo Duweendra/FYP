@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, Route, Routes, Navigate } from "react-router-dom";
 // reactstrap components
 import { Container } from "reactstrap";
@@ -11,10 +11,13 @@ import { ToastContainer, toast } from "react-toastify";
 import routes from "routes.js";
 import useAuth from "hooks/useAuth";
 import routes2 from "routes2.js";
+import loaderGif from "../assets/gifs/Spinner@1x-1.0s-200px-200px (1).gif";
+import "../assets/css/employee.css";
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
   const location = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
 
   const { setAuth, auth } = useAuth();
 
@@ -22,14 +25,20 @@ const Admin = (props) => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
     mainContent.current.scrollTop = 0;
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
   }, [location]);
+
+  const changeLoader = (loader) => {
+    setIsLoading(loader);
+  };
 
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
       if (prop.layout === "/admin") {
-        return (
-          <Route path={prop.path} element={prop.component} key={key} exact />
-        );
+        const Component = prop.component;
+        return <Route path={prop.path} element={Component} key={key} exact />;
       } else {
         return null;
       }
@@ -50,6 +59,11 @@ const Admin = (props) => {
 
   return (
     <>
+      {isLoading && (
+        <div className="overlay">
+          <img src={loaderGif} alt="Loading..." className="loader" />
+        </div>
+      )}
       <Sidebar
         {...props}
         routes={auth?.newUser?.isAdmin ? routes : routes2}
@@ -62,11 +76,16 @@ const Admin = (props) => {
       <div className="main-content" ref={mainContent}>
         <AdminNavbar
           {...props}
+          // changeLoader={changeLoader}
           brandText={getBrandText(props?.location?.pathname)}
         />
         <Routes>
           {getRoutes(auth?.newUser?.isAdmin ? routes : routes2)}
-          <Route path="*" element={<Navigate to="/admin/index" replace />} />
+          <Route
+            path="*"
+            //  changeLoader={changeLoader}
+            element={<Navigate to="/admin/index" replace />}
+          />
         </Routes>
         <Container fluid>
           <AdminFooter />
