@@ -6,6 +6,8 @@ import Employee from "../models/Employee.js";
 import Leave from "../models/Leave.js";
 import Attendance from "../models/Attendance.js";
 import Payroll from "../models/Payroll.js";
+import RFID from "../models/Rfid.js";
+import AttendanceLog from "../models/AttendanceLog copy.js";
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -397,6 +399,112 @@ const calculateTaxes = (grossSalary) => {
   return grossSalary * taxRate;
 };
 
+const createAttendanceLog = async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const rfid = await RFID.findOne({ rfid: id });
+    console.log("rfid", id);
+    if (!rfid) {
+      return res.status(404).json({ message: "RFID not found" });
+    }
+    const employee = await Employee.findById(rfid.employee);
+    console.log("rfid", employee);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    const newlog = new AttendanceLog({
+      employee: employee,
+      date: new Date(),
+      rfid: rfid.rfid,
+    });
+    await newlog.save();
+
+    res.status(200).json({ newlog: newlog });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Function to calculate hours between two dates
+function calculateHours(startTime, endTime) {
+  const diffMs = endTime - startTime;
+  return diffMs / (1000 * 60 * 60); // Convert milliseconds to hours
+}
+
+// Function to process attendance for a specific date
+async function processAttendance(date) {
+  try {
+    // Find all attendance logs for the specified date
+    const logs = await AttendanceLog.find({ date });
+
+    // Group logs by employee
+    const logsByEmployee = logs.reduce((acc, log) => {
+      const employeeId = log.employee.toString();
+      if (!acc[employeeId]) {
+        acc[employeeId] = [];
+      }
+      acc[employeeId].push(log);
+      return acc;
+    }, {});
+
+    // Process each employee's logs
+    for (const employeeId in logsByEmployee) {
+      const employeeLogs = logsByEmployee[employeeId];
+
+      // Assuming employeeLogs contains timestamps, calculate total hours worked
+      let totalTimeWorked = 0;
+      employeeLogs.forEach((log, index) => {
+        if (index < employeeLogs.length - 1) {
+          totalTimeWorked += calculateHours(
+            employeeLogs[index].createdAt,
+            employeeLogs[index + 1].createdAt
+          );
+        }
+      });
+
+      // Calculate regular time, extra time, and leave time
+      const regularTime = Math.min(totalTimeWorked, 8);
+      const extraTime = Math.max(totalTimeWorked - 8, 0);
+      const totalLeaveTime = Math.max(8 - totalTimeWorked, 0);
+
+      // Determine the attendance status
+      const status = totalTimeWorked > 0 ? "Present" : "Absent";
+
+      // Check if an attendance record already exists for this employee on the specified date
+      let attendance = await Attendance.findOne({ employee: employeeId, date });
+
+      if (attendance) {
+        // Update existing attendance record
+        attendance.status = status;
+        attendance.regularTime = regularTime;
+        attendance.extraTime = extraTime;
+        attendance.totalLeaveTime = totalLeaveTime;
+        attendance.totalTime = totalTimeWorked;
+      } else {
+        // Create a new attendance record
+        attendance = new Attendance({
+          employee: employeeId,
+          date,
+          status,
+          regularTime,
+          extraTime,
+          totalLeaveTime,
+          totalTime: totalTimeWorked,
+        });
+      }
+
+      // Save the attendance record
+      await attendance.save();
+    }
+
+    console.log("Attendance processing complete.");
+  } catch (error) {
+    console.error("Error processing attendance:", error);
+  }
+}
+
 export {
   getUsers,
   createUser,
@@ -409,4 +517,5 @@ export {
   getLeave,
   createOrUpdateAttendance,
   getAttendance,
+  createAttendanceLog,
 };
