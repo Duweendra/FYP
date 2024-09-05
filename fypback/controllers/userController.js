@@ -433,11 +433,20 @@ function calculateHours(startTime, endTime) {
   return diffMs / (1000 * 60 * 60); // Convert milliseconds to hours
 }
 
-// Function to process attendance for a specific date
-async function processAttendance(date) {
+async function processAttendance2(date) {
   try {
-    // Find all attendance logs for the specified date
-    const logs = await AttendanceLog.find({ date });
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0); // Set time to 00:00:00
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999); // Set time to 23:59:59
+
+    const logs = await AttendanceLog.find({
+      date: {
+        $gte: startOfDay,
+        $lt: endOfDay,
+      },
+    });
 
     // Group logs by employee
     const logsByEmployee = logs.reduce((acc, log) => {
@@ -453,27 +462,39 @@ async function processAttendance(date) {
     for (const employeeId in logsByEmployee) {
       const employeeLogs = logsByEmployee[employeeId];
 
-      // Assuming employeeLogs contains timestamps, calculate total hours worked
-      let totalTimeWorked = 0;
-      employeeLogs.forEach((log, index) => {
-        if (index < employeeLogs.length - 1) {
-          totalTimeWorked += calculateHours(
-            employeeLogs[index].createdAt,
-            employeeLogs[index + 1].createdAt
-          );
-        }
-      });
+      if (employeeLogs.length < 2) {
+        console.log(
+          `Not enough logs for employee ${employeeId} to calculate attendance.`
+        );
+        continue; // Skip processing if there's not enough logs (at least 2 logs are needed for start and end times)
+      }
+
+      // Sort logs by createdAt to ensure correct start and end times
+      employeeLogs.sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+
+      // Calculate total time worked based on the first log (start) and the last log (end)
+      const startTime = new Date(employeeLogs[0].createdAt);
+      const endTime = new Date(employeeLogs[employeeLogs.length - 1].createdAt);
+      const totalTimeWorked = calculateHours(startTime, endTime);
 
       // Calculate regular time, extra time, and leave time
-      const regularTime = Math.min(totalTimeWorked, 8);
-      const extraTime = Math.max(totalTimeWorked - 8, 0);
-      const totalLeaveTime = Math.max(8 - totalTimeWorked, 0);
+      const regularTime = Math.min(totalTimeWorked, 8); // Cap at 8 hours
+      const extraTime = Math.max(totalTimeWorked - 8, 0); // Anything over 8 hours
+      const totalLeaveTime = Math.max(8 - totalTimeWorked, 0); // If less than 8 hours
 
-      // Determine the attendance status
+      // Determine attendance status
       const status = totalTimeWorked > 0 ? "Present" : "Absent";
 
       // Check if an attendance record already exists for this employee on the specified date
-      let attendance = await Attendance.findOne({ employee: employeeId, date });
+      let attendance = await Attendance.findOne({
+        employee: employeeId,
+        date: {
+          $gte: startOfDay,
+          $lt: endOfDay,
+        },
+      });
 
       if (attendance) {
         // Update existing attendance record
@@ -497,6 +518,7 @@ async function processAttendance(date) {
 
       // Save the attendance record
       await attendance.save();
+      console.log(`Attendance saved for employee ${employeeId}.`);
     }
 
     console.log("Attendance processing complete.");
@@ -505,8 +527,94 @@ async function processAttendance(date) {
   }
 }
 
+//calpayroll
+const calculatePayroll = async (employeeId, payPeriodStart, payPeriodEnd) => {
+  try {
+    // Fetch attendance records for the employee during the pay period
+    const attendanceRecords = await Attendance.find({
+      employee: employeeId,
+      date: { $gte: payPeriodStart, $lte: payPeriodEnd },
+    });
+
+    if (!attendanceRecords.length) {
+      throw new Error("No attendance records found for this period.");
+    }
+
+    // Fetch employee details (e.g., hourly rate)
+    const employee = await Employee.findById(employeeId);
+    if (!employee) throw new Error("Employee not found");
+
+    const hourlyRate = employee.hourlyRate; // Assume the employee model contains hourlyRate
+    const overtimeRate = 1.5 * hourlyRate; // Overtime rate, assuming 1.5x regular rate
+
+    let totalRegularHours = 0;
+    let totalOvertimeHours = 0;
+
+    // Loop through the attendance records to calculate total hours
+    attendanceRecords.forEach((record) => {
+      totalRegularHours += record.regularTime;
+      totalOvertimeHours += record.extraTime;
+    });
+
+    // Calculate total leave hours (optional based on your leave policy)
+    let totalLeaveHours = attendanceRecords.reduce(
+      (acc, record) => acc + record.totalLeaveTime,
+      0
+    );
+
+    // Calculate total worked hours excluding leave
+    const totalWorkedHours =
+      totalRegularHours + totalOvertimeHours - totalLeaveHours;
+
+    // Calculate salary
+    const regularSalary = totalRegularHours * hourlyRate;
+    const overtimeSalary = totalOvertimeHours * overtimeRate;
+    const grossSalary = regularSalary + overtimeSalary;
+
+    const taxes = grossSalary * 0.2; // Assume 20% tax deduction (can be adjusted)
+    const netSalary = grossSalary - taxes;
+
+    // Save payroll record in the database
+    const payrollRecord = new Payroll({
+      employee: employeeId,
+      payPeriodStart,
+      payPeriodEnd,
+      regularHours: totalRegularHours,
+      overtimeHours: totalOvertimeHours,
+      totalHours: totalWorkedHours,
+      grossSalary,
+      taxes,
+      netSalary,
+    });
+
+    await payrollRecord.save();
+    return payrollRecord;
+  } catch (error) {
+    console.error("Error calculating payroll:", error);
+    throw error;
+  }
+};
+
+const calAttendance = async (req, res) => {
+  const { date } = req.body;
+
+  try {
+    const todayDate = new Date();
+    let newlog = "";
+    if (date && date !== null) {
+      newlog = await processAttendance2(date);
+    } else {
+      newlog = await processAttendance2(todayDate);
+    }
+    res.status(200).json({ newlog: newlog });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 export {
   getUsers,
+  calAttendance,
   createUser,
   createPayroll,
   loginUser,
@@ -518,4 +626,5 @@ export {
   createOrUpdateAttendance,
   getAttendance,
   createAttendanceLog,
+  calculatePayroll,
 };
