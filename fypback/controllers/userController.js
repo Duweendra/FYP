@@ -325,34 +325,34 @@ const createPayroll = async (req, res) => {
   const { employeeId, payPeriodStart, payPeriodEnd } = req.body;
 
   try {
-    const employee = await Employee.findById(employeeId);
+    let employee = await Employee.findById(employeeId);
     if (!employee) {
       throw new Error("Employee not found");
     }
 
-    const timeRecords = await Attendance.find({
+    let timeRecords = await Attendance.find({
       employee: employee.id,
       date: { $gte: payPeriodStart, $lte: payPeriodEnd },
     });
 
-    const regularHours = timeRecords.reduce(
+    let regularHours = timeRecords.reduce(
       (sum, record) => sum + record.regularTime,
       0
     );
-    const overtimeHours = timeRecords.reduce(
+    let overtimeHours = timeRecords.reduce(
       (sum, record) => sum + record.extraTime,
       0
     );
 
-    const regularSalary = regularHours * employee.salaryRate;
-    const overtimeSalary = overtimeHours * employee.overtimeRate;
-    const grossSalary = regularSalary + overtimeSalary;
+    let regularSalary = regularHours * employee.salaryRate;
+    let overtimeSalary = overtimeHours * employee.overtimeRate;
+    let grossSalary = regularSalary + overtimeSalary;
 
-    const taxes = calculateTaxes(grossSalary);
-    const netSalary = grossSalary - taxes;
+    let taxes = calculateTaxes(grossSalary);
+    let netSalary = grossSalary - taxes;
 
-    const payrollRecord = new Payroll({
-      employeeId,
+    let payrollRecord = new Payroll({
+      employee,
       payPeriodStart,
       payPeriodEnd,
       regularHours,
@@ -378,7 +378,10 @@ const getPayroll = async (req, res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const payrolls = await Payroll.find().limit(limit).skip(startIndex);
+    const payrolls = await Payroll.find()
+      .limit(limit)
+      .skip(startIndex)
+      .populate("employee");
 
     const totalPayrolls = await Payroll.countDocuments();
     const totalPages = Math.ceil(totalPayrolls / limit);

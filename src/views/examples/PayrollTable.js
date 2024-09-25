@@ -105,6 +105,7 @@ const PayrollTable = () => {
   };
   useEffect(() => {
     // fetchScans();
+    fetchScans();
     fetchEmployees();
   }, []);
 
@@ -199,8 +200,8 @@ const PayrollTable = () => {
 
   const handleEmployee = (itm) => {
     setEmployee(itm);
-    setPayroll({ ...payroll, employeeId: itm.id });
-    console.log();
+    setPayroll({ ...payroll, employeeId: itm._id });
+    console.log(itm);
   };
 
   const setPayrollDetails = (e, state) => {
@@ -231,7 +232,9 @@ const PayrollTable = () => {
                     <th scope="col">extraTime</th>
                     <th scope="col">totalLeaveTime</th>
                     <th scope="col">totalTime</th>
-                    <th scope="col">notes</th>
+                    <th scope="col">grossSalary</th>
+                    <th scope="col">taxes</th>
+                    <th scope="col">netSalary</th>
                     <th scope="col" />
                   </tr>
                 </thead>
@@ -257,12 +260,14 @@ const PayrollTable = () => {
                           </Media>
                         </Media>
                       </th>
-                      <td>{formatDate(scan.date)}</td>
-                      <td>{scan.regularTime}</td>
-                      <td>{scan.extraTime}</td>
+                      <td>{formatDate(scan.createdAt)}</td>
+                      <td>{scan.regularHours}</td>
+                      <td>{scan.overtimeHours}</td>
                       <td>{scan.totalLeaveTime}</td>
-                      <td>{scan.totalTime}</td>
-                      <td>{scan.notes}</td>
+                      <td>{scan.totalHours}</td>
+                      <td>{scan.grossSalary}</td>
+                      <td>{scan.taxes}</td>
+                      <td>{scan.netSalary}</td>
                       <td>
                         {" "}
                         <UncontrolledDropdown>
