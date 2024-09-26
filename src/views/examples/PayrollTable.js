@@ -261,13 +261,13 @@ const PayrollTable = () => {
                         </Media>
                       </th>
                       <td>{formatDate(scan.createdAt)}</td>
-                      <td>{scan.regularHours}</td>
-                      <td>{scan.overtimeHours}</td>
+                      <td>{parseFloat(scan.regularHours.toFixed(2))}</td>
+                      <td>{parseFloat(scan.overtimeHours.toFixed(2))}</td>
                       <td>{scan.totalLeaveTime}</td>
-                      <td>{scan.totalHours}</td>
-                      <td>{scan.grossSalary}</td>
-                      <td>{scan.taxes}</td>
-                      <td>{scan.netSalary}</td>
+                      <td>{parseFloat(scan.totalHours.toFixed(2))}</td>
+                      <td>{parseFloat(scan.grossSalary.toFixed(2))}</td>
+                      <td>{parseFloat(scan.taxes.toFixed(2))}</td>
+                      <td>{parseFloat(scan.netSalary.toFixed(2))}</td>
                       <td>
                         {" "}
                         <UncontrolledDropdown>
