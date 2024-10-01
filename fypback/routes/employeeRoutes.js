@@ -25,4 +25,5 @@ router.post("/attendance", createOrUpdateAttendance);
 router.get("/attendance", getAttendance);
 router.post("/payroll", createPayroll);
 router.get("/payroll", getPayroll);
+
 export default router;

@@ -5,6 +5,7 @@ import {
   getUsers,
   createUser,
   loginUser,
+  getUserById,
 } from "../controllers/userController.js";
 
 const router = Router();
@@ -12,5 +13,5 @@ const router = Router();
 router.get("/", getUsers);
 router.post("/", createUser);
 router.post("/login", loginUser);
-
+router.get("/users/:id", getUserById);
 export default router;

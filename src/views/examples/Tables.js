@@ -140,7 +140,7 @@ const Tables = (props) => {
     console.log(employee.image);
 
     try {
-      props.changeLoader(true);
+      // props.changeLoader(true);
       const response = await axios.post("/api/employee", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -148,9 +148,9 @@ const Tables = (props) => {
       fetchScans(currentPage);
       setEmployee(loadDefaultEmployeeObj);
       toggleModal();
-      props.changeLoader(false);
+      //  props.changeLoader(false);
     } catch (err) {
-      props.changeLoader(false);
+      //   props.changeLoader(false);
       if (!err?.response) {
         console.log(err);
         setErrMsg("No Server Response");

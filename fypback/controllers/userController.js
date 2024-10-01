@@ -7,7 +7,7 @@ import Leave from "../models/Leave.js";
 import Attendance from "../models/Attendance.js";
 import Payroll from "../models/Payroll.js";
 import RFID from "../models/Rfid.js";
-import AttendanceLog from "../models/AttendanceLog copy.js";
+import AttendanceLog from "../models/AttendanceLog.js";
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -287,6 +287,20 @@ const getUsers = async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id).populate("employee"); // Use populate if you want employee details as well
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -626,6 +640,7 @@ export {
   createLeave,
   getPayroll,
   getLeave,
+  getUserById,
   createOrUpdateAttendance,
   getAttendance,
   createAttendanceLog,
