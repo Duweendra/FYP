@@ -13,31 +13,59 @@ import {
 } from "reactstrap";
 // core components
 import UserHeader from "components/Headers/UserHeader.js";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "api/axios";
+import useAuth from "hooks/useAuth";
+
+const loadUser = () => {
+  return {
+    _id: "",
+    name: "",
+    email: "",
+    EmployeeStatus: "",
+    NIC: "",
+    Image: "",
+    JobTitle: "",
+  };
+};
 
 const Profile = () => {
-  const fetchScans = async () => {
-    try {
-      const response = await axios.get(`/api/users/${limit}`);
-      setScans(response?.data?.payrolls ?? []);
-      setTotalPages(response?.data?.totalPayrolls ?? 1); // Assuming you have a state for total pages
-      setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
-      setLoading(false);
-    } catch (error) {
-      setError(error.message);
-      setLoading(false);
-    }
-  };
+  const { setAuth, auth } = useAuth();
+  const [user, setUser] = useState(loadUser());
 
   useEffect(() => {
-    fetchScans();
+    const fetchUser = async () => {
+      try {
+        let id = auth?.newUser?._id;
+        const response = await axios.get(`/api/users/${id}`);
+        console.log("response", response.data);
+        let Resuser = response.data;
+        let userx = loadUser();
+        userx._id = Resuser._id;
+        userx.name = Resuser.name;
+        userx.email = Resuser.email;
+        userx.JobTitle = Resuser.employee.JobTitle;
+        userx.EmployeeStatus = Resuser.employee.EmployeeStatus;
+        userx.NIC = Resuser.employee.NIC;
+        userx.Image = Resuser.employee.image;
+        console.log("response2", userx);
+        setUser(userx);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchUser();
   }, []);
+
+  const setUserDetails = (e, state) => {
+    setUser({ ...user, [state]: e });
+  };
 
   return (
     <>
       <UserHeader />
       {/* Page content */}
-      <Container className="mt--7" fluid>
+      <Container style={{ marginTop: "-450px" }} fluid>
         <Row>
           <Col className="order-xl-2 mb-5 mb-xl-0" xl="4">
             <Card className="card-profile shadow">
@@ -48,7 +76,11 @@ const Profile = () => {
                       <img
                         alt="..."
                         className="rounded-circle"
-                        src={require("../../assets/img/theme/team-4-800x800.jpg")}
+                        src={
+                          user.Image
+                            ? `http://localhost:8000/${user.Image}`
+                            : require("../../assets/img/theme/user.png")
+                        }
                       />
                     </a>
                   </div>
@@ -151,8 +183,11 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="lucky.jesse"
+                            value={user.name}
                             id="input-username"
+                            onChange={(e) => {
+                              setUserDetails("name", e.target.value);
+                            }}
                             placeholder="Username"
                             type="text"
                           />
@@ -168,7 +203,10 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-email"
+                            value={user.email}
+                            onChange={(e) => {
+                              setUserDetails("email", e.target.value);
+                            }}
                             placeholder="jesse@example.com"
                             type="email"
                           />
@@ -193,7 +231,10 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="New York"
+                            value={user.EmployeeStatus}
+                            onChange={(e) => {
+                              setUserDetails("EmployeeStatus", e.target.value);
+                            }}
                             id="input-city"
                             placeholder="City"
                             type="text"
@@ -210,7 +251,10 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="United States"
+                            value={user.NIC}
+                            onChange={(e) => {
+                              setUserDetails("NIC", e.target.value);
+                            }}
                             id="input-country"
                             placeholder="Country"
                             type="text"
@@ -227,9 +271,13 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
+                            value={user.JobTitle}
+                            onChange={(e) => {
+                              setUserDetails("JobTitle", e.target.value);
+                            }}
                             id="input-postal-code"
-                            placeholder="Postal code"
-                            type="number"
+                            placeholder="JobTitle"
+                            type="text"
                           />
                         </FormGroup>
                       </Col>
