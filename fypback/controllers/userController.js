@@ -306,6 +306,58 @@ const getUserById = async (req, res) => {
   }
 };
 
+const editUserById = async (req, res) => {
+  const { _id, name, email, EmployeeStatus, NIC, JobTitle } = req.body;
+  try {
+    // Start transaction for atomic updates
+    const session = await User.startSession();
+    session.startTransaction();
+
+    // Fetch user by ID
+    const user = await User.findById(_id).populate("employee");
+    if (!user) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update User details
+    if (name) user.name = name;
+    if (email) user.email = email;
+    // Update Employee details if provided
+    if (user.employee) {
+      const employee = await Employee.findById(user.employee._id);
+
+      if (!employee) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({ message: "Employee not found" });
+      }
+
+      // Update employee fields if they are provided
+      if (name) employee.name = name;
+      if (JobTitle) employee.JobTitle = JobTitle;
+      if (NIC) employee.NIC = NIC;
+      if (EmployeeStatus) employee.EmployeeStatus = EmployeeStatus;
+      // Save the updated employee details
+      await employee.save({ session });
+    }
+    // Save the updated user details
+    await user.save({ session });
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({
+      message: "User and employee details updated successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -645,4 +697,5 @@ export {
   getAttendance,
   createAttendanceLog,
   calculatePayroll,
+  editUserById,
 };
