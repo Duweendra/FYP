@@ -8,6 +8,7 @@ import Attendance from "../models/Attendance.js";
 import Payroll from "../models/Payroll.js";
 import RFID from "../models/Rfid.js";
 import AttendanceLog from "../models/AttendanceLog.js";
+import moment from "moment";
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -681,6 +682,37 @@ const calAttendance = async (req, res) => {
   }
 };
 
+const getLeaveCountByDayForLastMonth = async (req, res) => {
+  try {
+    // Get the current date and the date 1 month ago
+    const today = moment().endOf("day");
+    const lastMonth = moment().subtract(3, "months").startOf("day");
+
+    // Query to find all leaves that occurred in the last month
+    const leaves = await Leave.find({
+      startDate: { $gte: lastMonth.toDate(), $lte: today.toDate() },
+    });
+
+    // Group the leaves by day
+    const leaveCountByDay = {};
+    for (let leave of leaves) {
+      // Use moment to format the start date to a day string
+      const leaveDay = moment(leave.startDate).format("YYYY-MM-DD");
+
+      // Initialize the count for that day if it doesn't exist
+      if (!leaveCountByDay[leaveDay]) {
+        leaveCountByDay[leaveDay] = 0;
+      }
+
+      leaveCountByDay[leaveDay]++;
+    }
+
+    res.status(200).json({ leaveCountByDay });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   getUsers,
   calAttendance,
@@ -698,4 +730,5 @@ export {
   createAttendanceLog,
   calculatePayroll,
   editUserById,
+  getLeaveCountByDayForLastMonth,
 };

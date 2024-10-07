@@ -4,6 +4,7 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import rfidRoutes from "./routes/rfidRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 import Cors from "cors";
 import morgan from "morgan";
 // Load environment variables
@@ -22,6 +23,7 @@ app.use(morgan("combined"));
 app.use("/api/users", userRoutes);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/rfid", rfidRoutes);
+app.use("/api/reports", reportRoutes);
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 const PORT = process.env.PORT || 5000;
