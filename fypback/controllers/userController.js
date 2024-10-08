@@ -712,6 +712,38 @@ const getLeaveCountByDayForLastMonth = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+const getAttendanceCountByDayForLastThreeMonths = async (req, res) => {
+  try {
+    // Get the current date and the date 3 months ago
+    const today = moment().endOf("day");
+    const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
+
+    // Query to find all attendance records that occurred in the last 3 months
+    const attendanceRecords = await Attendance.find({
+      date: { $gte: threeMonthsAgo.toDate(), $lte: today.toDate() },
+    });
+
+    // Group the attendance by day and determine if there was any presence
+    const attendancePresenceByDay = {};
+    for (let record of attendanceRecords) {
+      // Format the attendance date to a day string
+      const attendanceDay = moment(record.date).format("YYYY-MM-DD");
+
+      // Initialize the value for that day if it doesn't exist
+      if (!attendancePresenceByDay[attendanceDay]) {
+        attendancePresenceByDay[attendanceDay] = 0; // Default to 0 (no presence)
+      }
+
+      attendancePresenceByDay[attendanceDay]++;
+    }
+
+    res.status(200).json({
+      attendancePresenceByDay,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export {
   getUsers,
@@ -731,4 +763,5 @@ export {
   calculatePayroll,
   editUserById,
   getLeaveCountByDayForLastMonth,
+  getAttendanceCountByDayForLastThreeMonths,
 };

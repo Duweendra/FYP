@@ -34,6 +34,8 @@ const Index = (props) => {
   const [chartExample1Data, setChartExample1Data] = useState("data1");
   const [dates, setDates] = useState();
   const [counts, setCounts] = useState();
+  const [Adates, setADates] = useState();
+  const [Acounts, setACounts] = useState();
 
   useEffect(() => {
     const fetchLeaves = async () => {
@@ -48,7 +50,22 @@ const Index = (props) => {
         console.log(error);
       }
     };
+
+    const fetchAttendances = async () => {
+      try {
+        const response = await axios.post(`/api/reports/getattendances`);
+        const labels = Object.keys(response.data.attendancePresenceByDay);
+        const data = Object.values(response.data.attendancePresenceByDay);
+
+        setADates(labels);
+        setACounts(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     fetchLeaves();
+    fetchAttendances();
   }, []);
 
   if (window.Chart) {
@@ -137,11 +154,11 @@ const Index = (props) => {
     },
     data2: (canvas) => {
       return {
-        labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        labels: Adates,
         datasets: [
           {
             label: "Performance",
-            data: [0, 20, 5, 25, 10, 30, 15, 40, 40],
+            data: Acounts,
           },
         ],
       };
@@ -162,7 +179,11 @@ const Index = (props) => {
                     <h6 className="text-uppercase text-light ls-1 mb-1">
                       Overview
                     </h6>
-                    <h2 className="text-white mb-0">Leave Rate</h2>
+                    <h2 className="text-white mb-0">
+                      {chartExample1Data === "data1"
+                        ? "Leave Rate"
+                        : "Attendance Rate"}
+                    </h2>
                   </div>
                   <div className="col">
                     <Nav className="justify-content-end" pills>
@@ -174,7 +195,7 @@ const Index = (props) => {
                           href="#pablo"
                           onClick={(e) => toggleNavs(e, 1)}
                         >
-                          <span className="d-none d-md-block">Month</span>
+                          <span className="d-none d-md-block">Leave</span>
                           <span className="d-md-none">M</span>
                         </NavLink>
                       </NavItem>
@@ -187,7 +208,7 @@ const Index = (props) => {
                           href="#pablo"
                           onClick={(e) => toggleNavs(e, 2)}
                         >
-                          <span className="d-none d-md-block">Week</span>
+                          <span className="d-none d-md-block">Attendance</span>
                           <span className="d-md-none">W</span>
                         </NavLink>
                       </NavItem>
