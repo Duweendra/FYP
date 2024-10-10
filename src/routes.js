@@ -4,6 +4,7 @@ import Tables from "views/examples/Tables.js";
 import LeaveTable from "views/examples/LeaveTable";
 import AttendanceTable from "views/examples/AttendanceTable";
 import PayrollTable from "views/examples/PayrollTable";
+import Reports from "views/examples/Reports";
 
 var routes = [
   {
@@ -39,6 +40,13 @@ var routes = [
     name: "Payroll",
     icon: "ni ni-money-coins text-green",
     component: <PayrollTable />,
+    layout: "/admin",
+  },
+  {
+    path: "/reports",
+    name: "Reports",
+    icon: "ni ni-single-copy-04 text-red",
+    component: <Reports />,
     layout: "/admin",
   },
   {

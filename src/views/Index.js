@@ -19,12 +19,7 @@ import {
 } from "reactstrap";
 
 // core components
-import {
-  chartOptions,
-  parseOptions,
-  chartExample1,
-  chartExample2,
-} from "variables/charts.js";
+import { chartOptions, parseOptions, chartExample1 } from "variables/charts.js";
 
 import Header from "components/Headers/Header.js";
 import axios from "api/axios";
@@ -36,6 +31,8 @@ const Index = (props) => {
   const [counts, setCounts] = useState();
   const [Adates, setADates] = useState();
   const [Acounts, setACounts] = useState();
+  const [engagments, setEngagments] = useState();
+  const [ecounts, setEcounts] = useState();
 
   useEffect(() => {
     const fetchLeaves = async () => {
@@ -64,8 +61,22 @@ const Index = (props) => {
       }
     };
 
+    const fetchEngagement = async () => {
+      try {
+        const response = await axios.post(`/api/reports/getattendancerates`);
+        const labels = Object.keys(response.data);
+        const data = Object.values(response.data);
+        console.log(response);
+        setEngagments(labels);
+        setEcounts(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     fetchLeaves();
     fetchAttendances();
+    fetchEngagement();
   }, []);
 
   if (window.Chart) {
@@ -165,6 +176,49 @@ const Index = (props) => {
     },
   };
 
+  let chartExample2 = {
+    options: {
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              callback: function (value) {
+                if (!(value % 10)) {
+                  //return '$' + value + 'k'
+                  return value;
+                }
+              },
+            },
+          },
+        ],
+      },
+      tooltips: {
+        callbacks: {
+          label: function (item, data) {
+            var label = data.datasets[item.datasetIndex].label || "";
+            var yLabel = item.yLabel;
+            var content = "";
+            if (data.datasets.length > 1) {
+              content += label;
+            }
+            content += yLabel;
+            return content;
+          },
+        },
+      },
+    },
+    data: {
+      labels: engagments,
+      datasets: [
+        {
+          label: "Engagements",
+          data: ecounts,
+          maxBarThickness: 10,
+        },
+      ],
+    },
+  };
+
   return (
     <>
       <Header />
@@ -236,7 +290,7 @@ const Index = (props) => {
                     <h6 className="text-uppercase text-muted ls-1 mb-1">
                       Performance
                     </h6>
-                    <h2 className="mb-0">Total orders</h2>
+                    <h2 className="mb-0">Total Engagement Hours</h2>
                   </div>
                 </Row>
               </CardHeader>

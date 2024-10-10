@@ -745,6 +745,40 @@ const getAttendanceCountByDayForLastThreeMonths = async (req, res) => {
   }
 };
 
+const getTotalAttendanceChartData = async (req, res) => {
+  try {
+    // Get the current date and the date 3 months ago
+    const today = moment().endOf("day");
+    const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
+
+    // Query to find all attendance records that occurred in the last 3 months
+    const attendanceRecords = await Attendance.find({
+      date: { $gte: threeMonthsAgo.toDate(), $lte: today.toDate() },
+    });
+
+    // Initialize totals
+    let totalRegularTime = 0;
+    let totalExtraTime = 0;
+    let totalLeaveTime = 0;
+
+    // Loop through each record and sum the regularTime, extraTime, and totalLeaveTime
+    for (let record of attendanceRecords) {
+      totalRegularTime += record.regularTime || 0;
+      totalExtraTime += record.extraTime || 0;
+      totalLeaveTime += record.totalLeaveTime || 0;
+    }
+
+    // Send response with the total counts
+    res.status(200).json({
+      totalRegularTime: parseFloat(totalRegularTime.toFixed(2)),
+      totalExtraTime: parseFloat(totalExtraTime.toFixed(2)),
+      totalLeaveTime: parseFloat(totalLeaveTime.toFixed(2)),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   getUsers,
   calAttendance,
@@ -764,4 +798,5 @@ export {
   editUserById,
   getLeaveCountByDayForLastMonth,
   getAttendanceCountByDayForLastThreeMonths,
+  getTotalAttendanceChartData,
 };
