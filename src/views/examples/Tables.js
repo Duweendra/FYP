@@ -2,6 +2,7 @@ import axios from "../../api/axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "../../assets/css/employee.css";
+import * as XLSX from "xlsx";
 import {
   Badge,
   Card,
@@ -242,12 +243,47 @@ const Tables = (props) => {
     }
   };
 
+  const exportToExcel = () => {
+    // Create a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(scans);
+
+    // Set custom column widths
+    worksheet["!cols"] = [
+      { wch: 25 }, // "Name" column width
+      { wch: 20 }, // "Age" column width
+      { wch: 20 }, // "City" column width
+      { wch: 20 }, // "Name" column width
+      { wch: 20 }, // "Age" column width
+      { wch: 20 }, // "City" column width
+      { wch: 20 }, // "Name" column width
+      { wch: 20 }, // "Age" column width
+      { wch: 20 }, // "City" column width
+    ];
+    // Create a new workbook and append the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    // Get current date and time
+    const now = new Date();
+    const date = now.toLocaleDateString("en-GB").replace(/\//g, "-"); // Format: dd-mm-yyyy
+    const time = now.toLocaleTimeString("en-GB").replace(/:/g, "-"); // Format: hh-mm-ss
+
+    // Dynamic filename: Name_Date_Time.xlsx
+    const fileName = `Export_${date}_${time}.xlsx`;
+    // Export the workbook to an Excel file
+    XLSX.writeFile(workbook, fileName);
+  };
+
   return (
     <>
       <Header />
       {/* Page content */}
       <Container className="mt--7" fluid>
-        {/* Table */}
+        <Button className="pdfbtn" onClick={() => exportToExcel()}>
+          Pdf
+        </Button>
+        <Button className="excelbtn" onClick={() => exportToExcel()}>
+          Excel
+        </Button>
         <Button className="addemployee" onClick={() => openemployee()}>
           +
         </Button>

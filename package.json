@@ -64,7 +64,8 @@
     "reactstrap": "8.10.0",
     "sass": "1.69.5",
     "schema-utils": "^4.2.0",
-    "webpack-dev-server": "^5.0.4"
+    "webpack-dev-server": "^5.0.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "gulp": "4.0.2",
