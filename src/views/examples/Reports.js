@@ -1,45 +1,28 @@
 import axios from "../../api/axios";
-import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import React, { useEffect, useRef, useState } from "react";
 import "../../assets/css/reports.css";
 import * as XLSX from "xlsx";
 import { FaRegFilePdf } from "react-icons/fa6";
 import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import {
-  Badge,
   Card,
   CardHeader,
   CardFooter,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
-  DropdownToggle,
-  Media,
   Pagination,
   PaginationItem,
   PaginationLink,
-  Progress,
-  Table,
   Container,
   Row,
-  UncontrolledTooltip,
-  InputGroup,
-  FormGroup,
-  Input,
   Button,
-  Modal,
-  InputGroupAddon,
-  InputGroupText,
-  Col,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
-import ReactDatetimeClass from "react-datetime";
-import classNames from "classnames";
 import { Nav } from "react-bootstrap";
 import AttendanceTable from "./ReportTables/AttendanceTable";
 import EmployeeTable from "./ReportTables/Employeetable";
 import LeaveTable from "./ReportTables/LeaveTable";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const loadDefaultEmployeeObj = () => {
   return {
@@ -70,21 +53,15 @@ const Reports = () => {
   const [employs, setEmplos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [predict, setPredict] = useState("");
-  const [probability, setProbability] = useState("");
-  const [pid, setPid] = useState("");
-  const [note, setNote] = useState("");
   const [employee, setEmployee] = useState(loadDefaultEmployeeObj);
   const [payroll, setPayroll] = useState(loadDefaultPayrollObj);
-  const [errMsg, setErrMsg] = useState("");
-  const [page, setpage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [status, setStatus] = useState("Pending");
   const [activeTab, setActiveTab] = useState("leave"); // Set default tab
+
+  const EmployeeRef = useRef();
+  const LeaveRef = useRef();
+  const AttendanceRef = useRef();
 
   const fetchPayrolls = async (page = 1, limit = 5) => {
     try {
@@ -182,14 +159,18 @@ const Reports = () => {
 
   const exportToExcel = () => {
     let datas = [];
+    let xname = "Employee_Report";
     if (activeTab === "employee") {
       datas = employs;
+      xname = "Employee_Report";
     }
     if (activeTab === "leave") {
       datas = leaves;
+      xname = "Leave_Report";
     }
     if (activeTab === "attendance") {
       datas = attendances;
+      xname = "Attendance_Report";
     }
 
     // Create a worksheet
@@ -216,9 +197,57 @@ const Reports = () => {
     const time = now.toLocaleTimeString("en-GB").replace(/:/g, "-"); // Format: hh-mm-ss
 
     // Dynamic filename: Name_Date_Time.xlsx
-    const fileName = `Export_${date}_${time}.xlsx`;
+    const fileName = `${xname}_${date}_${time}.xlsx`;
     // Export the workbook to an Excel file
     XLSX.writeFile(workbook, fileName);
+  };
+
+  const exportToPDF = () => {
+    let input = EmployeeRef.current; // Reference to the table
+    let pdfname = "Employee_Report";
+    if (activeTab === "employee") {
+      input = EmployeeRef.current;
+      pdfname = "Employee_Report";
+    }
+    if (activeTab === "leave") {
+      input = LeaveRef.current;
+      pdfname = "Leave_Report";
+    }
+    if (activeTab === "attendance") {
+      input = AttendanceRef.current;
+      pdfname = "Attendance_Report";
+    }
+
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+
+      // Create a new jsPDF document in landscape orientation, A4 size
+      const pdf = new jsPDF("landscape", "mm", "a4");
+
+      // Get the width and height of the PDF page
+      const pdfWidth = pdf.internal.pageSize.getWidth(); // A4 width in landscape
+      const pdfHeight = pdf.internal.pageSize.getHeight(); // A4 height in landscape
+
+      // Calculate the aspect ratio of the canvas to maintain proportions
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const aspectRatio = canvasHeight / canvasWidth;
+
+      // Calculate the height to fit the image into the PDF while keeping the aspect ratio
+      const imgHeight = pdfWidth * aspectRatio;
+
+      // Add the image to the PDF, keeping it at the top left corner (x: 0, y: 0)
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+
+      // Get the current date and time for naming the file
+      const now = new Date();
+      const formattedDate = now.toISOString().slice(0, 10); // YYYY-MM-DD format
+      const formattedTime = now.toTimeString().slice(0, 8).replace(/:/g, "-"); // HH-MM-SS format
+      const finalFileName = `${pdfname}_${formattedDate}_${formattedTime}.pdf`;
+
+      // Save the PDF
+      pdf.save(finalFileName);
+    });
   };
 
   return (
@@ -256,7 +285,7 @@ const Reports = () => {
                     ? "Leave Reports"
                     : "Attendance Reports"}
                 </label>
-                <Button className="pdfbtn" onClick={() => exportToExcel()}>
+                <Button className="pdfbtn" onClick={() => exportToPDF()}>
                   <FaRegFilePdf style={{ fontSize: "17px" }} /> Pdf
                 </Button>
                 <Button className="excelbtn" onClick={() => exportToExcel()}>
@@ -267,13 +296,25 @@ const Reports = () => {
 
               {/* Conditionally render the table components */}
               {activeTab === "employee" && (
-                <EmployeeTable scans={employs} formatDate={formatDate} />
+                <EmployeeTable
+                  scans={employs}
+                  formatDate={formatDate}
+                  EmployeeRef={EmployeeRef}
+                />
               )}
               {activeTab === "leave" && (
-                <LeaveTable scans={leaves} formatDate={formatDate} />
+                <LeaveTable
+                  scans={leaves}
+                  formatDate={formatDate}
+                  LeaveRef={LeaveRef}
+                />
               )}
               {activeTab === "attendance" && (
-                <AttendanceTable scans={attendances} formatDate={formatDate} />
+                <AttendanceTable
+                  scans={attendances}
+                  formatDate={formatDate}
+                  AttendanceRef={AttendanceRef}
+                />
               )}
 
               <CardFooter className="py-4">

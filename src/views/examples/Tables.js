@@ -62,14 +62,8 @@ const Tables = (props) => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [predict, setPredict] = useState("");
-  const [probability, setProbability] = useState("");
-  const [pid, setPid] = useState("");
-  const [note, setNote] = useState("");
   const [employee, setEmployee] = useState(loadDefaultEmployeeObj);
   const [errMsg, setErrMsg] = useState("");
-  const [page, setpage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -278,12 +272,6 @@ const Tables = (props) => {
       <Header />
       {/* Page content */}
       <Container className="mt--7" fluid>
-        <Button className="pdfbtn" onClick={() => exportToExcel()}>
-          Pdf
-        </Button>
-        <Button className="excelbtn" onClick={() => exportToExcel()}>
-          Excel
-        </Button>
         <Button className="addemployee" onClick={() => openemployee()}>
           +
         </Button>

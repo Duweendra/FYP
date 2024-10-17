@@ -208,16 +208,22 @@ const LeaveTable = () => {
                     <tr key={scan._id}>
                       <th scope="row">
                         <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={`http://localhost:8000/${scan.employee.image}`}
-                            />
-                          </a>
+                          <img
+                            alt="..."
+                            src={
+                              scan.employee.image
+                                ? `http://localhost:8000/${scan.employee.image}`
+                                : require("../../assets/img/theme/user.png")
+                            }
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              borderRadius: "50%", // Makes the borders rounded
+                              objectFit: "cover", // Ensures the image fills the container without overflow
+                              marginRight: "20px",
+                            }}
+                          />
+
                           <Media>
                             <span className="mb-0 text-sm">
                               {scan.employee.name}
