@@ -12,36 +12,6 @@
   font-size: x-large;
 }
 
-.excelbtn {
-  top: -14px;
-  right: 213px;
-  z-index: 50;
-  font-size: 12px;
-  font-weight: 700;
-  background: #0bdb0b;
-  color: white;
-  border-radius: 30px;
-  border-radius: 30px;
-  padding: 10px 23px;
-  float: right;
-  border: 0px;
-}
-
-.pdfbtn {
-  top: -14px;
-  right: 375px;
-  z-index: 50;
-  font-size: 12px;
-  font-weight: 700;
-  background: #c21313;
-  color: white;
-  border-radius: 30px;
-  border-radius: 30px;
-  padding: 10px 23px;
-  float: right;
-  border: 0px;
-}
-
 .profileimage {
   opacity: 1;
   display: block;

@@ -1,7 +1,10 @@
 import axios from "../../api/axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import "../../assets/css/employee.css";
+import "../../assets/css/reports.css";
+import * as XLSX from "xlsx";
+import { FaRegFilePdf } from "react-icons/fa6";
+import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import {
   Badge,
   Card,
@@ -32,6 +35,11 @@ import {
 // core components
 import Header from "components/Headers/Header.js";
 import ReactDatetimeClass from "react-datetime";
+import classNames from "classnames";
+import { Nav } from "react-bootstrap";
+import AttendanceTable from "./ReportTables/AttendanceTable";
+import EmployeeTable from "./ReportTables/Employeetable";
+import LeaveTable from "./ReportTables/LeaveTable";
 
 const loadDefaultEmployeeObj = () => {
   return {
@@ -57,6 +65,8 @@ const loadDefaultPayrollObj = () => {
 
 const Reports = () => {
   const [scans, setScans] = useState([]);
+  const [leaves, setLeaves] = useState([]); // Leave data
+  const [attendances, setAttendances] = useState([]); // Attendance data
   const [employs, setEmplos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -74,8 +84,9 @@ const Reports = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState("Pending");
+  const [activeTab, setActiveTab] = useState("leave"); // Set default tab
 
-  const fetchScans = async (page = 1, limit = 5) => {
+  const fetchPayrolls = async (page = 1, limit = 5) => {
     try {
       const response = await axios.get(
         `/api/employee/payroll?page=${page}&limit=${limit}`
@@ -83,6 +94,36 @@ const Reports = () => {
       setScans(response?.data?.payrolls ?? []);
       setTotalPages(response?.data?.totalPayrolls ?? 1); // Assuming you have a state for total pages
       setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  const fetchAttendances = async (page = 1, limit = 5) => {
+    try {
+      const response = await axios.get(
+        `/api/employee/attendance?page=${page}&limit=${limit}`
+      );
+      setAttendances(response?.data?.attendances ?? []);
+      setTotalPages(response?.data?.totalAttendances ?? 1); // Assuming you have a state for total pages
+      setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  const fetchLeaves = async (page = 1, limit = 5) => {
+    try {
+      const response = await axios.get(
+        `/api/employee/leave?page=${page}&limit=${limit}`
+      );
+      setLeaves(response.data.leaves);
+      setTotalPages(response.data.totalLeaves); // Assuming you have a state for total pages
+      setCurrentPage(response.data.currentPage); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {
       setError(error.message);
@@ -98,6 +139,7 @@ const Reports = () => {
       //setTotalPages(response?.data?.totalPages ?? 1); // Assuming you have a state for total pages
       //setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
       setLoading(false);
+      console.log(employs);
     } catch (error) {
       setError(error.message);
       setLoading(false);
@@ -105,87 +147,23 @@ const Reports = () => {
   };
   useEffect(() => {
     // fetchScans();
-    fetchScans();
+    fetchAttendances();
+    fetchPayrolls();
+    fetchLeaves();
     fetchEmployees();
   }, []);
 
-  const handleRowClick = (scan) => {
-    setSelectedImage(`http://localhost:8000/${scan.image}`);
-    setShowModal(true);
-    setEmployee({
-      ...employee,
-      _id: scan._id,
-      name: scan.name,
-      JobTitle: scan.JobTitle,
-      EmployeeStatus: scan.EmployeeStatus,
-      JoinedDate: scan.JoinedDate,
-      image: selectedImage,
-    });
-  };
-
-  const handleClose = () => {
-    setShowModal(false);
-    setSelectedImage(null);
-  };
-
-  const openemployee = () => {
-    setSelectedImage(null);
-    setEmployee(loadDefaultEmployeeObj);
-    setShowModal(true);
-  };
-
-  const toggleModal = () => {
-    setShowModal(!showModal);
-  };
-
-  const handleSubmit = async (scan, e) => {
-    try {
-      console.log("payroll", payroll);
-      const response = await axios.post("/api/employee/payroll", payroll, {
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response) {
-        toast.info("Calculation Successful");
-      }
-      // fetchScans(currentPage);
-      // setEmployee(loadDefaultEmployeeObj);
-      // setPayroll(loadDefaultPayrollObj);
-    } catch (err) {
-      if (!err?.response) {
-        console.log(err);
-        setErrMsg("No Server Response");
-        toast.error("No Server Response", err);
-      } else if (err.response?.status === 400) {
-        setErrMsg(err.message);
-        toast.error("Saving error", err);
-      } else if (err.response?.status === 401) {
-        setErrMsg("Unauthorized");
-        toast.error("Unauthorized", err);
-      } else {
-        setErrMsg("Saving Failed");
-        toast.error("Saving Failed", err);
-      }
-    }
-  };
-
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Image = reader.result;
-        setSelectedImage(base64Image);
-        setEmployee({ ...employee, image: file });
-        console.log("file", file);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-
-    fetchScans(newPage);
+    if (activeTab === "employee") {
+      fetchEmployees(newPage);
+    }
+    if (activeTab === "leave") {
+      fetchLeaves(newPage);
+    }
+    if (activeTab === "attendance") {
+      fetchAttendances(newPage);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -193,113 +171,111 @@ const Reports = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const handleChange = (e, scan) => {
-    setStatus(e.target.value);
-    handleSubmit(scan, e);
-  };
-
   const handleEmployee = (itm) => {
     setEmployee(itm);
     setPayroll({ ...payroll, employeeId: itm._id });
     console.log(itm);
   };
+  const handleTabClick = (tab) => {
+    setActiveTab(tab); // Set the active tab
+  };
 
-  const setPayrollDetails = (e, state) => {
-    setPayroll({ ...payroll, [state]: e });
+  const exportToExcel = () => {
+    let datas = [];
+    if (activeTab === "employee") {
+      datas = employs;
+    }
+    if (activeTab === "leave") {
+      datas = leaves;
+    }
+    if (activeTab === "attendance") {
+      datas = attendances;
+    }
+
+    // Create a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(scans);
+
+    // Set custom column widths
+    worksheet["!cols"] = [
+      { wch: 25 }, // "Name" column width
+      { wch: 20 }, // "Age" column width
+      { wch: 20 }, // "City" column width
+      { wch: 20 }, // "Name" column width
+      { wch: 20 }, // "Age" column width
+      { wch: 20 }, // "City" column width
+      { wch: 20 }, // "Name" column width
+      { wch: 20 }, // "Age" column width
+      { wch: 20 }, // "City" column width
+    ];
+    // Create a new workbook and append the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    // Get current date and time
+    const now = new Date();
+    const date = now.toLocaleDateString("en-GB").replace(/\//g, "-"); // Format: dd-mm-yyyy
+    const time = now.toLocaleTimeString("en-GB").replace(/:/g, "-"); // Format: hh-mm-ss
+
+    // Dynamic filename: Name_Date_Time.xlsx
+    const fileName = `Export_${date}_${time}.xlsx`;
+    // Export the workbook to an Excel file
+    XLSX.writeFile(workbook, fileName);
   };
 
   return (
     <>
       <Header />
       {/* Page content */}
-      <Container className="mt--7" fluid>
+      <div className="TabMenu">
+        <Nav variant="tabs">
+          <Nav.Item>
+            <Nav.Link onClick={() => handleTabClick("employee")}>
+              Employee
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link onClick={() => handleTabClick("leave")}>Leave</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link onClick={() => handleTabClick("attendance")}>
+              Attendance
+            </Nav.Link>
+          </Nav.Item>
+        </Nav>
+      </div>
+      <Container className="ReportContainer" fluid>
         {/* Table */}
-        <Button className="addemployee" onClick={() => openemployee()}>
-          +
-        </Button>
+
         <Row>
           <div className="col">
             <Card className="shadow">
               <CardHeader className="border-0">
-                <h3 className="mb-0">Reports</h3>
+                <label className="Reporthead mb-0">
+                  {activeTab === "employee"
+                    ? "Employee Reports"
+                    : activeTab === "leave"
+                    ? "Leave Reports"
+                    : "Attendance Reports"}
+                </label>
+                <Button className="pdfbtn" onClick={() => exportToExcel()}>
+                  <FaRegFilePdf style={{ fontSize: "17px" }} /> Pdf
+                </Button>
+                <Button className="excelbtn" onClick={() => exportToExcel()}>
+                  <PiMicrosoftExcelLogoFill style={{ fontSize: "20px" }} />{" "}
+                  Excel
+                </Button>
               </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col">Employee</th>
-                    <th scope="col">date</th>
-                    <th scope="col">regularTime</th>
-                    <th scope="col">extraTime</th>
-                    <th scope="col">totalLeaveTime</th>
-                    <th scope="col">totalTime</th>
-                    <th scope="col">grossSalary</th>
-                    <th scope="col">taxes</th>
-                    <th scope="col">netSalary</th>
-                    <th scope="col" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {scans.map((scan) => (
-                    <tr key={scan._id}>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={`http://localhost:8000/${scan.employee.image}`}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              {scan.employee.name}
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>{formatDate(scan.createdAt)}</td>
-                      <td>{parseFloat(scan.regularHours.toFixed(2))}</td>
-                      <td>{parseFloat(scan.overtimeHours.toFixed(2))}</td>
-                      <td>{scan.totalLeaveTime}</td>
-                      <td>{parseFloat(scan.totalHours.toFixed(2))}</td>
-                      <td>{parseFloat(scan.grossSalary.toFixed(2))}</td>
-                      <td>{parseFloat(scan.taxes.toFixed(2))}</td>
-                      <td>{parseFloat(scan.netSalary.toFixed(2))}</td>
-                      <td>
-                        {" "}
-                        <UncontrolledDropdown>
-                          <DropdownToggle caret color="secondary">
-                            {scan.status}
-                          </DropdownToggle>
-                          <DropdownMenu>
-                            <DropdownItem
-                              value="Pending"
-                              onClick={(e) => handleChange(e, scan)}
-                            >
-                              Pending
-                            </DropdownItem>
-                            <DropdownItem
-                              value="Approved"
-                              onClick={(e) => handleChange(e, scan)}
-                            >
-                              Approved
-                            </DropdownItem>
-                            <DropdownItem
-                              value="Rejected"
-                              onClick={(e) => handleChange(e, scan)}
-                            >
-                              Rejected
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+
+              {/* Conditionally render the table components */}
+              {activeTab === "employee" && (
+                <EmployeeTable scans={employs} formatDate={formatDate} />
+              )}
+              {activeTab === "leave" && (
+                <LeaveTable scans={leaves} formatDate={formatDate} />
+              )}
+              {activeTab === "attendance" && (
+                <AttendanceTable scans={attendances} formatDate={formatDate} />
+              )}
+
               <CardFooter className="py-4">
                 <nav aria-label="...">
                   <PaginationComponent
@@ -312,112 +288,6 @@ const Reports = () => {
             </Card>
           </div>
         </Row>
-
-        <Modal
-          className="modal-dialog-centered modal-danger"
-          contentClassName="bg-gradient-primary"
-          isOpen={showModal}
-          toggle={toggleModal}
-        >
-          <div className="modal-header">
-            <div className="center-content ">
-              <h2>Calculate Payroll</h2>
-            </div>
-            <button
-              aria-label="Close"
-              className="close"
-              data-dismiss="modal"
-              type="button"
-              onClick={toggleModal}
-            >
-              <span aria-hidden={true}>×</span>
-            </button>
-          </div>
-          <div className="modal-body">
-            <form>
-              <FormGroup className="">
-                <Row>
-                  <Col sm="3">Employee</Col>
-                  <Col sm="9">
-                    <UncontrolledDropdown>
-                      <DropdownToggle caret color="secondary">
-                        {employee.name}
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        {employs.map((itm, idx) => (
-                          <DropdownItem
-                            key={itm._id}
-                            value={itm.name}
-                            onClick={() => handleEmployee(itm)}
-                          >
-                            {itm.name}
-                          </DropdownItem>
-                        ))}
-                      </DropdownMenu>
-                    </UncontrolledDropdown>
-                  </Col>
-                </Row>
-              </FormGroup>
-
-              <FormGroup>
-                <Row>
-                  <Col sm="3">From Date</Col>
-                  <Col sm="9">
-                    <InputGroup className="input-group-alternative">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="ni ni-calendar-grid-58" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <ReactDatetimeClass
-                        inputProps={{
-                          placeholder: "From Date",
-                        }}
-                        timeFormat={false}
-                        value={payroll.payPeriodStart}
-                        onChange={(date) =>
-                          setPayrollDetails(date.toDate(), "payPeriodStart")
-                        }
-                      />
-                    </InputGroup>
-                  </Col>
-                </Row>
-              </FormGroup>
-              <FormGroup>
-                <Row>
-                  <Col sm="3">To Date</Col>
-                  <Col sm="9">
-                    <InputGroup className="input-group-alternative">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="ni ni-calendar-grid-58" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <ReactDatetimeClass
-                        inputProps={{
-                          placeholder: "To Date",
-                        }}
-                        timeFormat={false}
-                        value={payroll.payPeriodEnd}
-                        onChange={(date) =>
-                          setPayrollDetails(date.toDate(), "payPeriodEnd")
-                        }
-                      />
-                    </InputGroup>
-                  </Col>
-                </Row>
-              </FormGroup>
-
-              <Button
-                color="secondary"
-                style={{ float: "right" }}
-                onClick={handleSubmit}
-              >
-                Calculate
-              </Button>
-            </form>
-          </div>
-        </Modal>
       </Container>
     </>
   );
