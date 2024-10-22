@@ -3,6 +3,8 @@ import Profile from "views/examples/Profile.js";
 import LeaveTable from "views/User/LeaveTable";
 import AttendanceTable from "views/examples/AttendanceTable";
 import PayrollTable from "views/examples/PayrollTable";
+import ELeaveTable from "views/examples/EmployeeView/ELeaveTable";
+import EAttendanceTable from "views/examples/EmployeeView/EAttendanceTable";
 
 var routes2 = [
   {
@@ -16,14 +18,14 @@ var routes2 = [
     path: "/leave",
     name: "Leave",
     icon: "ni ni-user-run text-blue",
-    component: <LeaveTable />,
+    component: <ELeaveTable />,
     layout: "/admin",
   },
   {
     path: "/attendance",
     name: "Attendance",
     icon: "ni ni-briefcase-24 text-purple",
-    component: <AttendanceTable />,
+    component: <EAttendanceTable />,
     layout: "/admin",
   },
   {

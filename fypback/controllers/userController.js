@@ -9,6 +9,7 @@ import Payroll from "../models/Payroll.js";
 import RFID from "../models/Rfid.js";
 import AttendanceLog from "../models/AttendanceLog.js";
 import moment from "moment";
+import mongoose, { Mongoose } from "mongoose";
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -148,16 +149,23 @@ const getAttendance = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const employeeid = parseInt(req.query.employeeid) || -1;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const attendances = await Attendance.find()
+    // Create filter object
+    let filter = {};
+    if (employeeid !== -1) {
+      filter.employeeid = employeeid;
+    }
+
+    const attendances = await Attendance.find(filter)
       .limit(limit)
       .skip(startIndex)
       .populate("employee");
 
-    const totalAttendances = await Attendance.countDocuments();
+    const totalAttendances = await Attendance.countDocuments(filter);
     const totalPages = Math.ceil(totalAttendances / limit);
 
     res.json({
@@ -175,16 +183,25 @@ const getLeave = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const employeeid = parseInt(req.query.employeeid) || -1;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const leaves = await Leave.find()
+    // Create filter object
+    let filter = {};
+    let employeeObjectId;
+    if (employeeid !== -1) {
+      employeeObjectId = new mongoose.Types.ObjectId(employeeid);
+      filter.employee = employeeObjectId;
+    }
+
+    const leaves = await Leave.find(filter)
       .limit(limit)
       .skip(startIndex)
       .populate("employee");
 
-    const totalleaves = await Leave.countDocuments();
+    const totalleaves = await Leave.countDocuments(filter);
     const totalPages = Math.ceil(totalleaves / limit);
 
     res.json({

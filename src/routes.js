@@ -1,10 +1,11 @@
 import Index from "views/Index.js";
 import Profile from "views/examples/Profile.js";
 import Tables from "views/examples/Tables.js";
-import LeaveTable from "views/examples/LeaveTable";
 import AttendanceTable from "views/examples/AttendanceTable";
 import PayrollTable from "views/examples/PayrollTable";
 import Reports from "views/examples/Reports";
+import ELeaveTable from "views/examples/EmployeeView/ELeaveTable";
+import LeaveTable from "views/examples/LeaveTable";
 
 var routes = [
   {
