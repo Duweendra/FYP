@@ -63,10 +63,13 @@ const EAttendanceTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState("Pending");
 
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const employeeid = storedUser?.newUser?.employee?._id ?? -1;
+
   const fetchScans = async (page = 1, limit = 5) => {
     try {
       const response = await axios.get(
-        `/api/employee/attendance?page=${page}&limit=${limit}`
+        `/api/employee/attendance?page=${page}&limit=${limit}&employeeid=${employeeid}`
       );
       setScans(response?.data?.attendances ?? []);
       setTotalPages(response?.data?.totalAttendances ?? 1); // Assuming you have a state for total pages
@@ -193,7 +196,6 @@ const EAttendanceTable = () => {
               <Table className="align-items-center table-flush" responsive>
                 <thead className="thead-light">
                   <tr>
-                    <th scope="col">Employee</th>
                     <th scope="col">date</th>
                     <th scope="col">regularTime</th>
                     <th scope="col">extraTime</th>
@@ -206,65 +208,12 @@ const EAttendanceTable = () => {
                 <tbody>
                   {scans.map((scan) => (
                     <tr key={scan._id}>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <img
-                            alt="..."
-                            src={
-                              scan.employee.image
-                                ? `http://localhost:8000/${scan.employee.image}`
-                                : require("../../../assets/img/theme/user.png")
-                            }
-                            style={{
-                              width: "60px",
-                              height: "60px",
-                              borderRadius: "50%", // Makes the borders rounded
-                              objectFit: "cover", // Ensures the image fills the container without overflow
-                              marginRight: "20px",
-                            }}
-                          />
-
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              {scan.employee.name}
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
                       <td>{formatDate(scan.date)}</td>
                       <td>{scan.regularTime}</td>
                       <td>{scan.extraTime}</td>
                       <td>{scan.totalLeaveTime}</td>
                       <td>{scan.totalTime}</td>
                       <td>{scan.notes}</td>
-                      <td>
-                        {" "}
-                        <UncontrolledDropdown>
-                          <DropdownToggle caret color="secondary">
-                            {scan.status}
-                          </DropdownToggle>
-                          <DropdownMenu>
-                            <DropdownItem
-                              value="Pending"
-                              onClick={(e) => handleChange(e, scan)}
-                            >
-                              Pending
-                            </DropdownItem>
-                            <DropdownItem
-                              value="Approved"
-                              onClick={(e) => handleChange(e, scan)}
-                            >
-                              Approved
-                            </DropdownItem>
-                            <DropdownItem
-                              value="Rejected"
-                              onClick={(e) => handleChange(e, scan)}
-                            >
-                              Rejected
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
                     </tr>
                   ))}
                 </tbody>

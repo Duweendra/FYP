@@ -69,7 +69,7 @@ const AttendanceTable = () => {
         `/api/employee/attendance?page=${page}&limit=${limit}`
       );
       setScans(response?.data?.attendances ?? []);
-      setTotalPages(response?.data?.totalAttendances ?? 1); // Assuming you have a state for total pages
+      setTotalPages(response?.data?.totalPages ?? 1); // Assuming you have a state for total pages
       setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {

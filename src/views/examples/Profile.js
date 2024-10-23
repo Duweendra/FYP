@@ -113,13 +113,6 @@ const Profile = () => {
                     {auth?.newUser?.employee?.JobTitle} -{" "}
                     {auth?.newUser?.employee?.EmployeeStatus}
                   </div>
-
-                  <hr className="my-4" />
-                  <p>
-                    Ryan — the name taken by Melbourne-raised, Brooklyn-based
-                    Nick Murphy — writes, performs and records all of his own
-                    music.
-                  </p>
                 </div>
               </CardBody>
             </Card>

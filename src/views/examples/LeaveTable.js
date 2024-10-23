@@ -69,7 +69,7 @@ const LeaveTable = () => {
         `/api/employee/leave?page=${page}&limit=${limit}`
       );
       setScans(response.data.leaves);
-      setTotalPages(response.data.totalLeaves); // Assuming you have a state for total pages
+      setTotalPages(response.data.totalPages); // Assuming you have a state for total pages
       setCurrentPage(response.data.currentPage); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {

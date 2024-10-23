@@ -149,15 +149,17 @@ const getAttendance = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const employeeid = parseInt(req.query.employeeid) || -1;
+    const employeeid = req.query.employeeid || null;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
     // Create filter object
     let filter = {};
-    if (employeeid !== -1) {
-      filter.employeeid = employeeid;
+    let employeeObjectId;
+    if (employeeid !== -1 && employeeid !== null) {
+      employeeObjectId = new mongoose.Types.ObjectId(employeeid);
+      filter.employee = employeeObjectId;
     }
 
     const attendances = await Attendance.find(filter)
@@ -183,7 +185,7 @@ const getLeave = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const employeeid = parseInt(req.query.employeeid) || -1;
+    const employeeid = req.query.employeeid || null;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -191,7 +193,7 @@ const getLeave = async (req, res) => {
     // Create filter object
     let filter = {};
     let employeeObjectId;
-    if (employeeid !== -1) {
+    if (employeeid !== -1 && employeeid !== null) {
       employeeObjectId = new mongoose.Types.ObjectId(employeeid);
       filter.employee = employeeObjectId;
     }
@@ -458,16 +460,24 @@ const getPayroll = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const employeeid = req.query.employeeid || null;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const payrolls = await Payroll.find()
+    let employeeObjectId;
+    let filter = {};
+    if (employeeid !== -1 && employeeid !== null) {
+      employeeObjectId = new mongoose.Types.ObjectId(employeeid);
+      filter.employee = employeeObjectId;
+    }
+
+    const payrolls = await Payroll.find(filter)
       .limit(limit)
       .skip(startIndex)
       .populate("employee");
 
-    const totalPayrolls = await Payroll.countDocuments();
+    const totalPayrolls = await Payroll.countDocuments(filter);
     const totalPages = Math.ceil(totalPayrolls / limit);
 
     res.json({

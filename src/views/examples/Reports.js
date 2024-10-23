@@ -69,7 +69,7 @@ const Reports = () => {
         `/api/employee/payroll?page=${page}&limit=${limit}`
       );
       setScans(response?.data?.payrolls ?? []);
-      setTotalPages(response?.data?.totalPayrolls ?? 1); // Assuming you have a state for total pages
+      setTotalPages(response?.data?.totalPages ?? 1); // Assuming you have a state for total pages
       setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {
@@ -84,7 +84,7 @@ const Reports = () => {
         `/api/employee/attendance?page=${page}&limit=${limit}`
       );
       setAttendances(response?.data?.attendances ?? []);
-      setTotalPages(response?.data?.totalAttendances ?? 1); // Assuming you have a state for total pages
+      setTotalPages(response?.data?.totalPages ?? 1); // Assuming you have a state for total pages
       setCurrentPage(response?.data?.currentPage ?? 1); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {
@@ -99,7 +99,7 @@ const Reports = () => {
         `/api/employee/leave?page=${page}&limit=${limit}`
       );
       setLeaves(response.data.leaves);
-      setTotalPages(response.data.totalLeaves); // Assuming you have a state for total pages
+      setTotalPages(response.data.totalPages); // Assuming you have a state for total pages
       setCurrentPage(response.data.currentPage); // Assuming you have a state for current page
       setLoading(false);
     } catch (error) {

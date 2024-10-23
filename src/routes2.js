@@ -1,10 +1,8 @@
 import Index from "views/Index.js";
 import Profile from "views/examples/Profile.js";
-import LeaveTable from "views/User/LeaveTable";
-import AttendanceTable from "views/examples/AttendanceTable";
-import PayrollTable from "views/examples/PayrollTable";
 import ELeaveTable from "views/examples/EmployeeView/ELeaveTable";
 import EAttendanceTable from "views/examples/EmployeeView/EAttendanceTable";
+import EPayrollTable from "views/examples/EmployeeView/EPayrollTable";
 
 var routes2 = [
   {
@@ -32,7 +30,7 @@ var routes2 = [
     path: "/payroll",
     name: "Payroll",
     icon: "ni ni-money-coins text-green",
-    component: <PayrollTable />,
+    component: <EPayrollTable />,
     layout: "/admin",
   },
   {
