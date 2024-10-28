@@ -327,7 +327,7 @@ const PayrollTable = () => {
         >
           <div className="modal-header">
             <div className="center-content ">
-              <h2>Calculate Payroll</h2>
+              <h2 style={{ color: "white" }}>Calculate Payroll</h2>
             </div>
             <button
               aria-label="Close"

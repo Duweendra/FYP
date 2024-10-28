@@ -184,9 +184,6 @@ const EAttendanceTable = () => {
       {/* Page content */}
       <Container className="mt--7" fluid>
         {/* Table */}
-        <Button className="addemployee" onClick={() => openemployee()}>
-          +
-        </Button>
         <Row>
           <div className="col">
             <Card className="shadow">

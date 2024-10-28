@@ -32,20 +32,21 @@ import {
 import Header from "components/Headers/Header.js";
 import ReactDatetimeClass from "react-datetime";
 
-const loadDefaultEmployeeObj = () => {
-  return {
-    _id: -1,
-    name: "",
-    DOB: new Date(),
-    Gender: "",
-    JoinedDate: new Date(),
-    EmployeeStatus: "",
-    JobTitle: "",
-    image: "",
-  };
-};
-
 const ELeaveTable = () => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const employeeid = storedUser?.newUser?.employee?._id ?? -1;
+
+  const loadDefaultLeaveObj = () => {
+    return {
+      id: -1,
+      employeeId: employeeid,
+      leaveType: "",
+      startDate: new Date(),
+      endDate: new Date(),
+      reason: "",
+      // status: "Pending",
+    };
+  };
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,16 +56,13 @@ const ELeaveTable = () => {
   const [probability, setProbability] = useState("");
   const [pid, setPid] = useState("");
   const [note, setNote] = useState("");
-  const [employee, setEmployee] = useState(loadDefaultEmployeeObj);
+  const [leave, setleave] = useState(loadDefaultLeaveObj);
   const [errMsg, setErrMsg] = useState("");
   const [page, setpage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState("Pending");
-
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const employeeid = storedUser?.newUser?.employee?._id ?? -1;
 
   const fetchScans = async (page = 1, limit = 5) => {
     try {
@@ -84,28 +82,13 @@ const ELeaveTable = () => {
     fetchScans();
   }, []);
 
-  const handleRowClick = (scan) => {
-    setSelectedImage(`http://localhost:8000/${scan.image}`);
-    setShowModal(true);
-    setEmployee({
-      ...employee,
-      _id: scan._id,
-      name: scan.name,
-      JobTitle: scan.JobTitle,
-      EmployeeStatus: scan.EmployeeStatus,
-      JoinedDate: scan.JoinedDate,
-      image: selectedImage,
-    });
-  };
-
   const handleClose = () => {
     setShowModal(false);
     setSelectedImage(null);
   };
 
-  const openemployee = () => {
-    setSelectedImage(null);
-    setEmployee(loadDefaultEmployeeObj);
+  const openleave = () => {
+    setleave(loadDefaultLeaveObj);
     setShowModal(true);
   };
 
@@ -113,52 +96,46 @@ const ELeaveTable = () => {
     setShowModal(!showModal);
   };
 
-  const handleSubmit = async (scan, e) => {
-    const leaveData = {
-      id: scan._id,
-      employeeId: scan.employee._id,
-      leaveType: scan.leaveType,
-      startDate: scan.startDate,
-      endDate: scan.endDate,
-      reason: scan.reason,
-      status: e.target.value,
-    };
-    try {
-      const response = await axios.post("/api/employee/leave", leaveData, {
-        headers: { "Content-Type": "application/json" },
-      });
-      toast.info("Saving Successful");
-      fetchScans(currentPage);
-      setEmployee(loadDefaultEmployeeObj);
-    } catch (err) {
-      if (!err?.response) {
-        console.log(err);
-        setErrMsg("No Server Response");
-        toast.error("No Server Response", err);
-      } else if (err.response?.status === 400) {
-        setErrMsg("Saving error");
-        toast.error("Saving error", err);
-      } else if (err.response?.status === 401) {
-        setErrMsg("Unauthorized");
-        toast.error("Unauthorized", err);
+  const leavevaliation = () => {
+    if (leave.reason.length > 0) {
+      if (leave.leaveType.length > 0) {
+        return true;
       } else {
-        setErrMsg("Saving Failed");
-        toast.error("Saving Failed", err);
+        toast.warn("Please add Leave Type");
+        return false;
       }
+    } else {
+      toast.warn("Please add Leave Reason");
+      return false;
     }
   };
 
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Image = reader.result;
-        setSelectedImage(base64Image);
-        setEmployee({ ...employee, image: file });
-        console.log("file", file);
-      };
-      reader.readAsDataURL(file);
+  const handleSubmit = async () => {
+    if (leavevaliation()) {
+      try {
+        const response = await axios.post("/api/employee/leave", leave, {
+          headers: { "Content-Type": "application/json" },
+        });
+        toast.info("Leave Request Successful");
+        fetchScans(currentPage);
+        setleave(loadDefaultLeaveObj);
+        setShowModal(false);
+      } catch (err) {
+        if (!err?.response) {
+          console.log(err);
+          setErrMsg("No Server Response");
+          toast.error("No Server Response", err);
+        } else if (err.response?.status === 400) {
+          setErrMsg("Saving error");
+          toast.error("Saving error", err);
+        } else if (err.response?.status === 401) {
+          setErrMsg("Unauthorized");
+          toast.error("Unauthorized", err);
+        } else {
+          setErrMsg("Saving Failed");
+          toast.error("Saving Failed", err);
+        }
+      }
     }
   };
 
@@ -184,7 +161,7 @@ const ELeaveTable = () => {
       {/* Page content */}
       <Container className="mt--7" fluid>
         {/* Table */}
-        <Button className="addemployee" onClick={() => openemployee()}>
+        <Button className="addemployee" onClick={() => openleave()}>
           +
         </Button>
         <Row>
@@ -236,6 +213,7 @@ const ELeaveTable = () => {
           toggle={toggleModal}
         >
           <div className="modal-header">
+            <h2 style={{ color: "white" }}>Leave Request</h2>
             <button
               aria-label="Close"
               className="close"
@@ -247,40 +225,23 @@ const ELeaveTable = () => {
             </button>
           </div>
           <div className="modal-body">
-            <div className="center-content p-3">
-              <h2>Add Employee</h2>
-              {selectedImage && (
-                <img
-                  src={selectedImage}
-                  alt="Selected Scan"
-                  style={{ width: "200px", height: "auto" }}
-                />
-              )}
-            </div>
-            <form onSubmit={handleSubmit}>
+            <div className="center-content  pt-1"></div>
+            <form>
               <FormGroup className="mb-3">
+                <label style={{ fontSize: "14px" }}>Leave Reason</label>
                 <InputGroup className="input-group-alternative">
                   <Input
-                    placeholder="Employee Full Name"
+                    placeholder="Leave Reason"
                     type="text"
-                    value={employee.name}
+                    value={leave.reason}
                     onChange={(e) =>
-                      setEmployee({ ...employee, name: e.target.value })
+                      setleave({ ...leave, reason: e.target.value })
                     }
                   />
                 </InputGroup>
               </FormGroup>
-              <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    color="info"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </InputGroup>
-              </FormGroup>
               <FormGroup>
+                <label style={{ fontSize: "14px" }}>Leave Start Date</label>
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
                     <InputGroupText>
@@ -289,49 +250,70 @@ const ELeaveTable = () => {
                   </InputGroupAddon>
                   <ReactDatetimeClass
                     inputProps={{
-                      placeholder: "Employee Joined Date",
+                      placeholder: "Leave Start Day",
                     }}
                     timeFormat={false}
-                    value={employee.JoinedDate}
+                    value={leave.startDate}
                     onChange={(date) =>
-                      setEmployee({ ...employee, JoinedDate: date.toDate() })
+                      setleave({ ...leave, startDate: date.toDate() })
                     }
                   />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
+                <label style={{ fontSize: "14px" }}>Leave End Date</label>
                 <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Job Title"
-                    type="text"
-                    value={employee.JobTitle}
-                    onChange={(e) =>
-                      setEmployee({ ...employee, JobTitle: e.target.value })
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText>
+                      <i className="ni ni-calendar-grid-58" />
+                    </InputGroupText>
+                  </InputGroupAddon>
+                  <ReactDatetimeClass
+                    inputProps={{
+                      placeholder: "Leave Start Day",
+                    }}
+                    timeFormat={false}
+                    value={leave.endDate}
+                    onChange={(date) =>
+                      setleave({ ...leave, endDate: date.toDate() })
                     }
                   />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
+                <label style={{ fontSize: "14px" }}>Leave type</label>
                 <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Employee Status"
-                    type="text"
-                    value={employee.EmployeeStatus}
-                    onChange={(e) =>
-                      setEmployee({
-                        ...employee,
-                        EmployeeStatus: e.target.value,
-                      })
-                    }
-                  />
+                  <UncontrolledDropdown>
+                    <DropdownToggle caret color="secondary">
+                      {leave.leaveType}
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      <DropdownItem
+                        value="Matrinity"
+                        onClick={(e) =>
+                          setleave({ ...leave, leaveType: e.target.value })
+                        }
+                      >
+                        Matrinity
+                      </DropdownItem>
+                      <DropdownItem
+                        value="Other"
+                        onClick={(e) =>
+                          setleave({ ...leave, leaveType: e.target.value })
+                        }
+                      >
+                        Other
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </UncontrolledDropdown>
                 </InputGroup>
               </FormGroup>
               <Button
                 color="secondary"
                 style={{ float: "right" }}
-                type="submit"
+                onClick={handleSubmit}
               >
-                Save
+                Submit
               </Button>
             </form>
           </div>
