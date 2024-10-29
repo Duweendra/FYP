@@ -88,6 +88,11 @@ const Profile = () => {
                   <div className="card-profile-image">
                     <a href="#pablo" onClick={(e) => e.preventDefault()}>
                       <img
+                        style={{
+                          height: "180px",
+                          width: "180px",
+                          objectFit: "cover",
+                        }}
                         alt="..."
                         className="rounded-circle"
                         src={

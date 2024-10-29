@@ -3,13 +3,14 @@ import Profile from "views/examples/Profile.js";
 import ELeaveTable from "views/examples/EmployeeView/ELeaveTable";
 import EAttendanceTable from "views/examples/EmployeeView/EAttendanceTable";
 import EPayrollTable from "views/examples/EmployeeView/EPayrollTable";
+import Index2 from "views/Index2";
 
 var routes2 = [
   {
     path: "/index",
     name: "Dashboard",
     icon: "ni ni-tv-2 text-primary",
-    component: <Index />,
+    component: <Index2 />,
     layout: "/admin",
   },
   {

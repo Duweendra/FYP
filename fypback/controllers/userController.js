@@ -715,10 +715,22 @@ const getLeaveCountByDayForLastMonth = async (req, res) => {
     const today = moment().endOf("day");
     const lastMonth = moment().subtract(3, "months").startOf("day");
 
-    // Query to find all leaves that occurred in the last month
-    const leaves = await Leave.find({
+    const employeeId = req.query.employeeId || null;
+    console.log("employeeId", employeeId);
+    if (employeeId) {
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+    }
+    const query = {
       startDate: { $gte: lastMonth.toDate(), $lte: today.toDate() },
-    });
+    };
+    if (employeeId) {
+      query.employee = employeeId;
+    }
+    // Query to find all leaves that occurred in the last month
+    const leaves = await Leave.find(query);
 
     // Group the leaves by day
     const leaveCountByDay = {};
@@ -741,14 +753,27 @@ const getLeaveCountByDayForLastMonth = async (req, res) => {
 };
 const getAttendanceCountByDayForLastThreeMonths = async (req, res) => {
   try {
-    // Get the current date and the date 3 months ago
+    const employeeId = req.query.employeeId || null;
+    console.log("employeeId", employeeId);
+    if (employeeId) {
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+    }
     const today = moment().endOf("day");
     const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
 
-    // Query to find all attendance records that occurred in the last 3 months
-    const attendanceRecords = await Attendance.find({
+    const query = {
       date: { $gte: threeMonthsAgo.toDate(), $lte: today.toDate() },
-    });
+    };
+    if (employeeId) {
+      query.employee = employeeId;
+    }
+    // Get the current date and the date 3 months ago
+
+    // Query to find all attendance records that occurred in the last 3 months
+    const attendanceRecords = await Attendance.find(query);
 
     // Group the attendance by day and determine if there was any presence
     const attendancePresenceByDay = {};
