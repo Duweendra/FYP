@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import classnames from "classnames";
 import Chart from "chart.js";
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Doughnut } from "react-chartjs-2";
 
 import {
   Button,
@@ -32,6 +32,8 @@ const Index2 = (props) => {
   const [Adates, setADates] = useState();
   const [Acounts, setACounts] = useState();
   const [engagments, setEngagments] = useState();
+  const [engagmentratios, setEngagmentratios] = useState();
+  const [eRcounts, setREcounts] = useState();
   const [ecounts, setEcounts] = useState();
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const employeeid = storedUser?.newUser?.employee?._id ?? -1;
@@ -81,8 +83,24 @@ const Index2 = (props) => {
       }
     };
 
+    const fetchEngagementRatio = async () => {
+      try {
+        const response = await axios.post(
+          `/api/reports/getattendanceratio?employeeId=${employeeid}`
+        );
+        const labels = Object.keys(response.data);
+        const data = Object.values(response.data);
+        console.log(response);
+        setEngagmentratios(labels);
+        setREcounts(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     fetchLeaves();
     fetchAttendances();
+    fetchEngagementRatio();
     fetchEngagement();
   }, []);
 
@@ -226,6 +244,27 @@ const Index2 = (props) => {
     },
   };
 
+  let chartexample3 = {
+    data: {
+      labels: engagmentratios,
+      datasets: [
+        {
+          label: "My First Dataset",
+          data: eRcounts,
+          backgroundColor: [
+            "rgb(54, 162, 235)",
+            "rgb(255, 205, 86)",
+            "rgb(255, 99, 132)",
+          ],
+          hoverOffset: 10,
+        },
+      ],
+    },
+    options: {
+      cutout: "50%", // Adjust this to control thickness (lower value makes it thicker)
+    },
+  };
+
   return (
     <>
       <Header />
@@ -297,7 +336,7 @@ const Index2 = (props) => {
                     <h6 className="text-uppercase text-muted ls-1 mb-1">
                       Performance
                     </h6>
-                    <h2 className="mb-0">Total Engagement Hours</h2>
+                    <h2 className="mb-0">Total Engagement Ratio</h2>
                   </div>
                 </Row>
               </CardHeader>
@@ -307,6 +346,31 @@ const Index2 = (props) => {
                   <Bar
                     data={chartExample2.data}
                     options={chartExample2.options}
+                  />
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+        <Row className="mt-4">
+          <Col xl="6">
+            <Card className="shadow">
+              <CardHeader className="bg-transparent">
+                <Row className="align-items-center">
+                  <div className="col">
+                    <h6 className="text-uppercase text-muted ls-1 mb-1">
+                      Performance
+                    </h6>
+                    <h2 className="mb-0">Total Engagement Hours</h2>
+                  </div>
+                </Row>
+              </CardHeader>
+              <CardBody>
+                {/* Chart */}
+                <div className="chart">
+                  <Doughnut
+                    data={chartexample3.data}
+                    options={chartexample3.options}
                   />
                 </div>
               </CardBody>

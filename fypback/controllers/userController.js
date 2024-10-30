@@ -843,6 +843,58 @@ const getTotalAttendanceChartData = async (req, res) => {
   }
 };
 
+const getTotalAttendanceRatioChartData = async (req, res) => {
+  try {
+    const today = moment().endOf("day");
+    const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
+
+    const employeeId = req.query.employeeId || null;
+    console.log("employeeId", employeeId);
+    if (employeeId) {
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+    }
+    const query = {
+      date: { $gte: threeMonthsAgo.toDate(), $lte: today.toDate() },
+    };
+    if (employeeId) {
+      query.employee = employeeId;
+    }
+
+    const attendanceRecords = await Attendance.find(query);
+
+    let totalRegularTime = 0;
+    let totalExtraTime = 0;
+    let totalLeaveTime = 0;
+
+    for (let record of attendanceRecords) {
+      totalRegularTime += record.regularTime || 0;
+      totalExtraTime += record.extraTime || 0;
+      totalLeaveTime += record.totalLeaveTime || 0;
+    }
+
+    const totalTime = totalRegularTime + totalExtraTime + totalLeaveTime;
+
+    // Calculate ratios
+    const regularTimeRatio = totalTime
+      ? (totalRegularTime / totalTime) * 100
+      : 0;
+    const extraTimeRatio = totalTime ? (totalExtraTime / totalTime) * 100 : 0;
+    const leaveTimeRatio = totalTime ? (totalLeaveTime / totalTime) * 100 : 0;
+
+    // Send response with totals and ratios
+    res.status(200).json({
+      regularTimeRatio: parseFloat(regularTimeRatio.toFixed(2)),
+      extraTimeRatio: parseFloat(extraTimeRatio.toFixed(2)),
+      leaveTimeRatio: parseFloat(leaveTimeRatio.toFixed(2)),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   getUsers,
   calAttendance,
@@ -850,6 +902,7 @@ export {
   createPayroll,
   loginUser,
   createOrUpdateEmployee,
+  getTotalAttendanceRatioChartData,
   getEmployee,
   createLeave,
   getPayroll,
