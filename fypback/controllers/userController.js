@@ -803,10 +803,22 @@ const getTotalAttendanceChartData = async (req, res) => {
     const today = moment().endOf("day");
     const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
 
-    // Query to find all attendance records that occurred in the last 3 months
-    const attendanceRecords = await Attendance.find({
+    const employeeId = req.query.employeeId || null;
+    console.log("employeeId", employeeId);
+    if (employeeId) {
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+    }
+    const query = {
       date: { $gte: threeMonthsAgo.toDate(), $lte: today.toDate() },
-    });
+    };
+    if (employeeId) {
+      query.employee = employeeId;
+    }
+    // Query to find all attendance records that occurred in the last 3 months
+    const attendanceRecords = await Attendance.find(query);
 
     // Initialize totals
     let totalRegularTime = 0;
