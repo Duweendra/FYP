@@ -3,16 +3,14 @@ import useAuth from "../hooks/useAuth";
 import { useEffect } from "react";
 
 const RequireAuth = () => {
-    const { auth,setAuth } = useAuth();
-    const location = useLocation();
-    
-   
+  const { auth, setAuth } = useAuth();
+  const location = useLocation();
 
-    return (
-        auth?.user
-            ? <Outlet />
-            : <Navigate to="/auth" state={{ from: location }} replace />
-    );
-}
+  return auth?.user ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/auth" state={{ from: location }} replace />
+  );
+};
 
 export default RequireAuth;
