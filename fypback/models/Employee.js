@@ -39,6 +39,10 @@ const EmployeeSchema = new Schema(
     image: {
       type: String,
     },
+    rfid: {
+      type: Schema.Types.ObjectId,
+      ref: "rfid",
+    },
   },
   {
     timestamps: true,

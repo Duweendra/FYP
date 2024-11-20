@@ -593,6 +593,23 @@ class Navspills extends React.Component {
                     </Col>
                   </Row>
                 </FormGroup>
+                <FormGroup>
+                  <Row>
+                    <Col sm="3">RFID ID</Col>
+                    <Col sm="9">
+                      <InputGroup className="input-group-alternative">
+                        <Input
+                          placeholder="RFID"
+                          type="text"
+                          value={employee.rfid}
+                          onChange={(e) =>
+                            setEmployeeDetails(e.target.value, "rfid")
+                          }
+                        />
+                      </InputGroup>
+                    </Col>
+                  </Row>
+                </FormGroup>
               </TabPane>
             </TabContent>
             <Button

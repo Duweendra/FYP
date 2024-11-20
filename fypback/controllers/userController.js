@@ -224,7 +224,9 @@ const createOrUpdateEmployee = async (req, res) => {
     JobTitle,
     NIC,
     JoinedDate,
+    ProbationEndDate,
     EmployeeStatus,
+    rfid,
     email,
     password,
     isAdmin,
@@ -239,6 +241,7 @@ const createOrUpdateEmployee = async (req, res) => {
         JobTitle,
         JoinedDate,
         NIC,
+        ProbationEndDate,
         EmployeeStatus,
         image: imagePath,
       });
@@ -253,6 +256,14 @@ const createOrUpdateEmployee = async (req, res) => {
         isAdmin: isAdmin,
       });
       await user.save();
+
+      const RFID1 = new RFID({
+        employee: newEmployee,
+        rfid: rfid,
+      });
+      await RFID1.save();
+      newEmployee.rfid = RFID1;
+      await newEmployee.save();
       res.status(201).json({ employeeinfo: newEmployee });
     } else {
       // Update existing employee
@@ -262,6 +273,8 @@ const createOrUpdateEmployee = async (req, res) => {
           name,
           JobTitle,
           JoinedDate,
+          NIC,
+          ProbationEndDate,
           EmployeeStatus,
           image: imagePath,
         },
@@ -287,7 +300,10 @@ const getEmployee = async (req, res) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const employees = await Employee.find().limit(limit).skip(startIndex);
+    const employees = await Employee.find()
+      .limit(limit)
+      .skip(startIndex)
+      .populate("rfid");
 
     const totalEmployees = await Employee.countDocuments();
     const totalPages = Math.ceil(totalEmployees / limit);

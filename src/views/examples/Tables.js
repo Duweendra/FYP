@@ -52,6 +52,7 @@ const loadDefaultEmployeeObj = () => {
     Manager: "",
     email: "",
     password: "",
+    rfid: "",
     isAdmin: false,
   };
 };
@@ -94,8 +95,12 @@ const Tables = (props) => {
       ...employee,
       _id: scan._id,
       name: scan.name,
+      NIC: scan.NIC,
+      rfid: scan.rfid,
+      isAdmin: scan.isAdmin,
       JobTitle: scan.JobTitle,
       EmployeeStatus: scan.EmployeeStatus,
+      ProbationEndDate: scan.ProbationEndDate,
       JoinedDate: scan.JoinedDate,
       image: selectedImage,
     });
@@ -125,6 +130,7 @@ const Tables = (props) => {
     formData.append("EmployeeStatus", employee.EmployeeStatus);
     formData.append("DOB", employee.DOB);
     formData.append("NIC", employee.NIC);
+    formData.append("rfid", employee.rfid);
     formData.append("JobTitle", employee.JobTitle);
     formData.append("JoinedDate", employee.JoinedDate);
     formData.append("ProbationEndDate", employee.ProbationEndDate);

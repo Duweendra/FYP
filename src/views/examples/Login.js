@@ -1,10 +1,8 @@
-
-
-import useAuth from '../../hooks/useAuth';
-import { Link,useNavigate} from 'react-router-dom';
-import React ,{useRef,Section,useState,useEffect}from 'react'
-import axios from '../../api/axios';
-import { toast } from 'react-toastify';
+import useAuth from "../../hooks/useAuth";
+import { Link, useNavigate } from "react-router-dom";
+import React, { useRef, Section, useState, useEffect } from "react";
+import axios from "../../api/axios";
+import { toast } from "react-toastify";
 // reactstrap components
 import {
   Button,
@@ -22,73 +20,70 @@ import {
 } from "reactstrap";
 
 const Login = () => {
-
   const { setAuth } = useAuth();
   const navigate = useNavigate();
 
-  const userRef =useRef('');
+  const userRef = useRef("");
   const errRef = useRef();
 
-  const [user,setUser] =useState('');
-  const [pwd,setPwd] =useState('');
-  const [errMsg,setErrMsg] =useState('');
-  const LOGIN_URL = '/api/users/login';
-  const from = "/admin"
+  const [user, setUser] = useState("");
+  const [pwd, setPwd] = useState("");
+  const [errMsg, setErrMsg] = useState("");
+  const LOGIN_URL = "/api/users/login";
+  const from = "/admin";
 
-/*   useEffect(()=> {
+  /*   useEffect(()=> {
     userRef.current.focus();
   },[]) */
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     try {
-      const response = await axios.post(LOGIN_URL,
-          JSON.stringify({ email:user,password:pwd }),
-          {
-              headers: { 'Content-Type': 'application/json' }
-             // withCredentials: true
-          }
+      const response = await axios.post(
+        LOGIN_URL,
+        JSON.stringify({ email: user, password: pwd }),
+        {
+          headers: { "Content-Type": "application/json" },
+          // withCredentials: true
+        }
       );
 
-     const accessToken=(response?.data?.accessToken);
-     const newUser=(response?.data?.userinfo);
+      const accessToken = response?.data?.accessToken;
+      const newUser = response?.data?.userinfo;
 
-      localStorage.setItem('user',JSON.stringify({user,newUser,accessToken}))
-      console.log(JSON.stringify({ user,newUser,accessToken}))
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ user, newUser, accessToken })
+      );
+      console.log(JSON.stringify({ user, newUser, accessToken }));
       const userData = { user, newUser, accessToken };
       setAuth(userData);
 
       navigate(from);
-      toast.info('Login Successful');
-     
-
-  } catch (err) {
-      if (!(err?.response)) {
-        console.log(err)
-          setErrMsg('No Server Response');
-          toast.error('No Server Response',err);
+      toast.info("Login Successful");
+    } catch (err) {
+      if (!err?.response) {
+        console.log(err);
+        setErrMsg("No Server Response");
+        toast.error("No Server Response", err);
       } else if (err.response?.status === 400) {
-          setErrMsg('Missing Username or Password');
-          toast.error('Missing Username or Password',err);
+        setErrMsg("Missing Username or Password");
+        toast.error("Missing Username or Password", err);
       } else if (err.response?.status === 401) {
-          setErrMsg('Unauthorized');
-          toast.error('Unauthorized',err);
+        setErrMsg("Unauthorized");
+        toast.error("Unauthorized", err);
       } else {
-          setErrMsg('Login Failed');
-          toast.error('Login Failed',err);
+        setErrMsg("Login Failed");
+        toast.error("Login Failed", err);
       }
-      
-  }
-
-  }
+    }
+  };
 
   return (
     <>
       <Col lg="5" md="7">
         <Card className="bg-secondary shadow border-0">
-         
           <CardBody className="px-lg-5 py-lg-5">
             <div className="text-center text-muted mb-4">
               <small>Sign in with your credentials</small>
@@ -156,7 +151,7 @@ const Login = () => {
               href="/"
               onClick={(e) => e.preventDefault()}
             >
-              <small>Forgot password?</small>
+              {/* <small>Forgot password?</small> */}
             </a>
           </Col>
           <Col className="text-right" xs="6">
@@ -165,7 +160,7 @@ const Login = () => {
               href="/auth/register"
               onClick={(e) => e.preventDefault()}
             >
-              <small>Create new account</small>
+              {/* <small>Create new account</small> */}
             </a>
           </Col>
         </Row>

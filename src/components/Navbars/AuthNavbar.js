@@ -62,7 +62,7 @@ const AdminNavbar = () => {
                 </Col>
               </Row>
             </div>
-            <Nav className="ml-auto" navbar>
+            {/* <Nav className="ml-auto" navbar>
               <NavItem>
                 <NavLink className="nav-link-icon" to="/" tag={Link}>
                   <i className="ni ni-planet" />
@@ -85,7 +85,7 @@ const AdminNavbar = () => {
                   <span className="nav-link-inner--text">Login</span>
                 </NavLink>
               </NavItem>
-            </Nav>
+            </Nav> */}
           </UncontrolledCollapse>
         </Container>
       </Navbar>
