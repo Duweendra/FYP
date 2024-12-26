@@ -69,3 +69,7 @@
 .content {
   transition: filter 0.3s ease; /* Smooth transition for the blur effect */
 }
+
+.modal-content {
+  height: 100%;
+}

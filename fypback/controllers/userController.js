@@ -246,7 +246,7 @@ const createOrUpdateEmployee = async (req, res) => {
         image: imagePath,
       });
       const hashedPassword = await bcrypt.hash(password, 10);
-      await newEmployee.save();
+      let newEmployee3 = await newEmployee.save();
 
       const user = new User({
         name,
@@ -262,23 +262,37 @@ const createOrUpdateEmployee = async (req, res) => {
         rfid: rfid,
       });
       await RFID1.save();
-      newEmployee.rfid = RFID1;
-      await newEmployee.save();
+
       res.status(201).json({ employeeinfo: newEmployee });
     } else {
       // Update existing employee
-      const updatedEmployee = await Employee.findByIdAndUpdate(
-        id,
+      const updatedEmployee = await Employee.findByIdAndUpdate(id, {
+        name,
+        JobTitle,
+        NIC,
+        JoinedDate,
+        ProbationEndDate,
+        EmployeeStatus,
+        image: imagePath,
+      });
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const RFID1 = await RFID.findOneAndUpdate(
+        {
+          employee: updatedEmployee,
+        },
+        { rfid: rfid }
+      );
+
+      const user = await User.findOneAndUpdate(
+        {
+          employee: updatedEmployee,
+        },
         {
           name,
-          JobTitle,
-          JoinedDate,
-          NIC,
-          ProbationEndDate,
-          EmployeeStatus,
-          image: imagePath,
-        },
-        { new: true }
+          email,
+          password: hashedPassword,
+          isAdmin: isAdmin,
+        }
       );
 
       if (!updatedEmployee) {
@@ -296,14 +310,18 @@ const getEmployee = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-
+    const ispagination = req.query.ispagination;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-
-    const employees = await Employee.find()
-      .limit(limit)
-      .skip(startIndex)
-      .populate("rfid");
+    let employees;
+    if (ispagination === true) {
+      employees = await Employee.find()
+        .limit(limit)
+        .skip(startIndex)
+        .populate("rfid");
+    } else {
+      employees = await Employee.find().populate("rfid");
+    }
 
     const totalEmployees = await Employee.countDocuments();
     const totalPages = Math.ceil(totalEmployees / limit);
@@ -446,6 +464,13 @@ const createPayroll = async (req, res) => {
       0
     );
 
+    if (employee.salaryRate == null || employee.salaryRate == undefined) {
+      employee.salaryRate = 500;
+    }
+    if (employee.overtimeRate == null || employee.overtimeRate == undefined) {
+      employee.overtimeRate = 600;
+    }
+
     let regularSalary = regularHours * employee.salaryRate;
     let overtimeSalary = overtimeHours * employee.overtimeRate;
     let grossSalary = regularSalary + overtimeSalary;
@@ -504,6 +529,74 @@ const getPayroll = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteEmployee = async (req, res) => {
+  const { id } = req.params; // Employee ID to delete
+
+  // Start a session for the transaction
+  const session = await Employee.startSession();
+  session.startTransaction();
+
+  try {
+    // Find the employee to ensure it exists
+    const employee = await Employee.findById(id).session(session);
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    // Remove associated user
+    const user = await User.findOneAndDelete({ employee: id }).session(session);
+
+    // Remove associated RFID record
+    const rfidRecord = await RFID.findOneAndDelete({ employee: id }).session(
+      session
+    );
+
+    // Delete the employee record
+    await Employee.findByIdAndDelete(id).session(session);
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      message: "Employee deleted successfully",
+      details: { employee, user, rfidRecord },
+    });
+  } catch (error) {
+    // Abort the transaction if any error occurs
+    await session.abortTransaction();
+    session.endSession();
+
+    res.status(400).json({
+      message: "Failed to delete employee. Transaction aborted.",
+      error: error.message,
+    });
+  }
+};
+
+const deleteLeave = async (req, res) => {
+  const { id } = req.params; // Leave ID to delete
+
+  try {
+    // Find the leave record to ensure it exists
+    const leave = await Leave.findById(id);
+
+    if (!leave) {
+      return res.status(404).json({ message: "Leave record not found" });
+    }
+
+    // Delete the leave record
+    await Leave.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Leave record deleted successfully" });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Failed to delete leave record", error: error.message });
   }
 };
 
@@ -729,7 +822,7 @@ const getLeaveCountByDayForLastMonth = async (req, res) => {
   try {
     // Get the current date and the date 1 month ago
     const today = moment().endOf("day");
-    const lastMonth = moment().subtract(3, "months").startOf("day");
+    const lastMonth = moment().subtract(8, "months").startOf("day");
 
     const employeeId = req.query.employeeId || null;
     console.log("employeeId", employeeId);
@@ -778,7 +871,7 @@ const getAttendanceCountByDayForLastThreeMonths = async (req, res) => {
       }
     }
     const today = moment().endOf("day");
-    const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
+    const threeMonthsAgo = moment().subtract(8, "months").startOf("day");
 
     const query = {
       date: { $gte: threeMonthsAgo.toDate(), $lte: today.toDate() },
@@ -817,7 +910,7 @@ const getTotalAttendanceChartData = async (req, res) => {
   try {
     // Get the current date and the date 3 months ago
     const today = moment().endOf("day");
-    const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
+    const threeMonthsAgo = moment().subtract(8, "months").startOf("day");
 
     const employeeId = req.query.employeeId || null;
     console.log("employeeId", employeeId);
@@ -862,7 +955,7 @@ const getTotalAttendanceChartData = async (req, res) => {
 const getTotalAttendanceRatioChartData = async (req, res) => {
   try {
     const today = moment().endOf("day");
-    const threeMonthsAgo = moment().subtract(3, "months").startOf("day");
+    const threeMonthsAgo = moment().subtract(8, "months").startOf("day");
 
     const employeeId = req.query.employeeId || null;
     console.log("employeeId", employeeId);
@@ -929,7 +1022,9 @@ export {
   createAttendanceLog,
   calculatePayroll,
   editUserById,
+  deleteEmployee,
   getLeaveCountByDayForLastMonth,
   getAttendanceCountByDayForLastThreeMonths,
   getTotalAttendanceChartData,
+  deleteLeave,
 };

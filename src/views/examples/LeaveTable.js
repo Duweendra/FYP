@@ -31,6 +31,7 @@ import {
 // core components
 import Header from "components/Headers/Header.js";
 import ReactDatetimeClass from "react-datetime";
+import { RiDeleteBin7Line } from "react-icons/ri";
 
 const loadDefaultEmployeeObj = () => {
   return {
@@ -159,6 +160,22 @@ const LeaveTable = () => {
     }
   };
 
+  const handleDelete = async (leaveId) => {
+    if (window.confirm("Are you sure you want to delete this leave?")) {
+      try {
+        const response = await axios.post(`/api/employee/leave/${leaveId}`);
+        alert(response.data.message);
+        fetchScans(); // Refresh the employee list after deletion
+      } catch (error) {
+        console.error(
+          "Error deleting leave:",
+          error.response?.data || error.message
+        );
+        alert("Failed to delete the leave. Please try again.");
+      }
+    }
+  };
+
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
 
@@ -186,7 +203,7 @@ const LeaveTable = () => {
         </Button>
         <Row>
           <div className="col">
-            <Card className="shadow">
+            <Card className="shadow" style={{ width: "106%" }}>
               <CardHeader className="border-0">
                 <h3 className="mb-0">Leaves</h3>
               </CardHeader>
@@ -263,6 +280,11 @@ const LeaveTable = () => {
                             </DropdownItem>
                           </DropdownMenu>
                         </UncontrolledDropdown>
+                      </td>
+                      <td>
+                        <Button onClick={() => handleDelete(scan._id)}>
+                          <RiDeleteBin7Line />
+                        </Button>
                       </td>
                     </tr>
                   ))}

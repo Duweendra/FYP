@@ -89,10 +89,10 @@ const PayrollTable = () => {
       setLoading(false);
     }
   };
-  const fetchEmployees = async (page = 1, limit = 5) => {
+  const fetchEmployees = async (page = 1, limit = 5, ispagination = true) => {
     try {
       const response = await axios.get(
-        `/api/employee/?page=${page}&limit=${limit}`
+        `/api/employee/?ispagination=${ispagination}`
       );
       setEmplos(response?.data?.employees ?? []);
       //setTotalPages(response?.data?.totalPages ?? 1); // Assuming you have a state for total pages

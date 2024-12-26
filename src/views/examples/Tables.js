@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "../../assets/css/employee.css";
 import * as XLSX from "xlsx";
+import { RiDeleteBin7Line } from "react-icons/ri";
 import {
   Badge,
   Card,
@@ -273,6 +274,22 @@ const Tables = (props) => {
     XLSX.writeFile(workbook, fileName);
   };
 
+  const handleDelete = async (employeeId) => {
+    if (window.confirm("Are you sure you want to delete this employee?")) {
+      try {
+        const response = await axios.post(`/api/employee/${employeeId}`);
+        alert(response.data.message);
+        fetchScans(); // Refresh the employee list after deletion
+      } catch (error) {
+        console.error(
+          "Error deleting employee:",
+          error.response?.data || error.message
+        );
+        alert("Failed to delete the employee. Please try again.");
+      }
+    }
+  };
+
   return (
     <>
       <Header />
@@ -294,14 +311,14 @@ const Tables = (props) => {
                     <th scope="col">Job Title</th>
                     <th scope="col">Employment Status</th>
                     <th scope="col">Sub Unit</th>
-                    <th scope="col">Location</th>
+                    <th scope="col"></th>
                     <th scope="col" />
                   </tr>
                 </thead>
                 <tbody>
                   {scans.map((scan) => (
-                    <tr key={scan._id} onClick={() => handleRowClick(scan)}>
-                      <th scope="row">
+                    <tr key={scan._id}>
+                      <th scope="row" onClick={() => handleRowClick(scan)}>
                         <Media className="align-items-center">
                           <img
                             alt="..."
@@ -324,9 +341,20 @@ const Tables = (props) => {
                           </Media>
                         </Media>
                       </th>
-                      <td>{scan.JobTitle}</td>
-                      <td>{scan.EmployeeStatus}</td>
-                      <td>{scan.EmployeeStatus}</td>
+                      <td onClick={() => handleRowClick(scan)}>
+                        {scan.JobTitle}
+                      </td>
+                      <td onClick={() => handleRowClick(scan)}>
+                        {scan.EmployeeStatus}
+                      </td>
+                      <td onClick={() => handleRowClick(scan)}>
+                        {scan.EmployeeStatus}
+                      </td>
+                      <td>
+                        <Button onClick={() => handleDelete(scan._id)}>
+                          <RiDeleteBin7Line />
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -363,7 +391,7 @@ const Tables = (props) => {
               <span aria-hidden={true}>×</span>
             </button>
           </div>
-          <div className="modal-body">
+          <div className="modal-body" style={{ height: "85%" }}>
             <Navspills
               employee={employee}
               handleSubmit={handleSubmit}

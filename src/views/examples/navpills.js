@@ -95,6 +95,21 @@ class Navspills extends React.Component {
       handleSubmit,
       validateEmployee,
     } = this.props;
+
+    let jobRoles = [
+      "Front Desk Agent",
+      "Concierge",
+      "Executive Housekeeper",
+      "Chef",
+      "Bartender",
+      "Sales Manager",
+      "HR Manager",
+      "Maintenance Manager",
+      "Security Guard",
+      "Spa Manager",
+      "General Manager",
+      // Add more roles as needed
+    ];
     return (
       <>
         <div className="nav-wrapper">
@@ -155,7 +170,7 @@ class Navspills extends React.Component {
             </NavItem>
           </Nav>
         </div>
-        <Card className="shadow">
+        <Card className="shadow" style={{ height: "85%", overflowX: "auto" }}>
           <CardBody>
             <TabContent activeTab={"tabs" + this.state.circledNavPills}>
               <TabPane tabId="tabs1">
@@ -476,30 +491,17 @@ class Navspills extends React.Component {
                             {employee.JobTitle}
                           </DropdownToggle>
                           <DropdownMenu>
-                            <DropdownItem
-                              value="SE"
-                              onClick={(e) =>
-                                setEmployeeDetails(e.target.value, "JobTitle")
-                              }
-                            >
-                              SE
-                            </DropdownItem>
-                            <DropdownItem
-                              value="QA"
-                              onClick={(e) =>
-                                setEmployeeDetails(e.target.value, "JobTitle")
-                              }
-                            >
-                              QA
-                            </DropdownItem>
-                            <DropdownItem
-                              value="Manager"
-                              onClick={(e) =>
-                                setEmployeeDetails(e.target.value, "JobTitle")
-                              }
-                            >
-                              Manager
-                            </DropdownItem>
+                            {jobRoles.map((role, index) => (
+                              <DropdownItem
+                                key={index} // Unique key for each item
+                                value={role}
+                                onClick={(e) =>
+                                  setEmployeeDetails(e.target.value, "JobTitle")
+                                } // Pass role to handler
+                              >
+                                {role}
+                              </DropdownItem>
+                            ))}
                           </DropdownMenu>
                         </UncontrolledDropdown>
                       </Col>

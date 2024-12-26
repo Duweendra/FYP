@@ -175,6 +175,35 @@ const AttendanceTable = () => {
     handleSubmit(scan, e);
   };
 
+  const calculateAttendance = async (date = null) => {
+    try {
+      const response = await axios.post("/api/rfid/calAttendance", {
+        date, // Pass the date or null to the API
+      });
+      console.log("Attendance Log:", response.data.newlog);
+      toast.info("Saving Successful");
+      fetchScans(currentPage);
+      setEmployee(loadDefaultEmployeeObj);
+      toggleModal();
+    } catch (err) {
+      if (!err?.response) {
+        console.log(err);
+        setErrMsg("No Server Response");
+        toast.error("No Server Response", err);
+      } else if (err.response?.status === 400) {
+        setErrMsg("Saving error");
+        toast.error("Saving error", err);
+      } else if (err.response?.status === 401) {
+        setErrMsg("Unauthorized");
+        toast.error("Unauthorized", err);
+      } else {
+        setErrMsg("Saving Failed");
+        toast.error("Saving Failed", err);
+      }
+      throw error; // Re-throw error if needed for further handling
+    }
+  };
+
   return (
     <>
       <Header />
@@ -232,10 +261,10 @@ const AttendanceTable = () => {
                         </Media>
                       </th>
                       <td>{formatDate(scan.date)}</td>
-                      <td>{scan.regularTime}</td>
-                      <td>{scan.extraTime}</td>
-                      <td>{scan.totalLeaveTime}</td>
-                      <td>{scan.totalTime}</td>
+                      <td>{scan.regularTime.toFixed(2)}</td>
+                      <td>{scan.extraTime.toFixed(2)}</td>
+                      <td>{scan.totalLeaveTime.toFixed(2)}</td>
+                      <td>{scan.totalTime.toFixed(2)}</td>
                       <td>{scan.notes}</td>
                       <td>
                         {" "}
@@ -301,38 +330,9 @@ const AttendanceTable = () => {
           </div>
           <div className="modal-body">
             <div className="center-content p-3">
-              <h2>Add Employee</h2>
-              {selectedImage && (
-                <img
-                  src={selectedImage}
-                  alt="Selected Scan"
-                  style={{ width: "200px", height: "auto" }}
-                />
-              )}
+              <h2>Generate Attendances</h2>
             </div>
-            <form onSubmit={handleSubmit}>
-              <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Employee Full Name"
-                    type="text"
-                    value={employee.name}
-                    onChange={(e) =>
-                      setEmployee({ ...employee, name: e.target.value })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    color="info"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </InputGroup>
-              </FormGroup>
+            <form>
               <FormGroup>
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
@@ -352,39 +352,13 @@ const AttendanceTable = () => {
                   />
                 </InputGroup>
               </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Job Title"
-                    type="text"
-                    value={employee.JobTitle}
-                    onChange={(e) =>
-                      setEmployee({ ...employee, JobTitle: e.target.value })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    placeholder="Employee Status"
-                    type="text"
-                    value={employee.EmployeeStatus}
-                    onChange={(e) =>
-                      setEmployee({
-                        ...employee,
-                        EmployeeStatus: e.target.value,
-                      })
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
+
               <Button
                 color="secondary"
                 style={{ float: "right" }}
-                type="submit"
+                onClick={() => calculateAttendance(employee.JoinedDate)}
               >
-                Save
+                Generate
               </Button>
             </form>
           </div>
